@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Suma 2 numeros</title>
-</head>
-<body>
+@extends('layouts.app')
+
+@section('content')
     <h2>Suma de 2 números</h2>
     <form action="/suma" method="POST">
         @csrf
@@ -20,5 +15,5 @@
     @if(isset($resultado))
         <h3>Resultado: {{ $resultado }}</h3>
     @endif
-</body>
-</html>
+    
+@endsection
