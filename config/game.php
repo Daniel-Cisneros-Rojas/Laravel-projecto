@@ -16,7 +16,35 @@ return [
             'slug' => 'catch-the-character',
             'description' => 'Aprende identificando Hanzi',
             'icon' => '🎮',
+            'route' => 'catchTheCharacter.show',
         ],
+        'memory_hanzi' => [
+            'name' => 'Memory Hanzi',
+            'slug' => 'memory-game',
+            'description' => 'Empareja caracteres con su pinyin y aprende a dibujarlos',
+            'icon' => '🎴',
+            'route' => 'memoryGame.show',
+        ],
+    ],
+
+    'memory_game' => [
+        'modes' => [
+            'hanzi-pinyin' => [
+                'name' => 'Hanzi ↔ Pinyin',
+                'description' => 'Empareja el carácter con su pronunciación',
+            ],
+            'hanzi-meaning' => [
+                'name' => 'Hanzi ↔ Significado',
+                'description' => 'Empareja el carácter con su significado en español',
+            ],
+        ],
+        'default_mode' => 'hanzi-pinyin',
+        'default_pairs' => 6,
+        'max_pairs' => 8,
+        'duration' => 300,
+        'match_score' => 50,
+        'drawing_bonus_perfect' => 100,
+        'drawing_bonus_good' => 50,
     ],
 
     'levels' => [

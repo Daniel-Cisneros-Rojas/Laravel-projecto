@@ -2,751 +2,1125 @@
 
 @section('styles')
 <style>
-    body {
-        overflow: hidden !important;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .container {
-        max-width: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        height: 100vh !important;
-    }
+    body { overflow: hidden !important; }
 
-    .game-container {
-        background: white;
-        border-radius: 0;
-        overflow: hidden;
-        box-shadow: none;
+    .container { max-width: none !important; padding: 0 !important; margin: 0 !important; height: 100vh !important; }
+
+    /* ── Layout ───────────────────────────────────── */
+    .game-shell {
         display: flex;
         flex-direction: column;
         height: 100vh;
         width: 100vw;
         position: fixed;
-        top: 0;
-        left: 0;
+        inset: 0;
+        background: linear-gradient(160deg, #0f0c29 0%, #1a1145 40%, #24243e 100%);
+        color: #e2e8f0;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
-    .game-header {
-        background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
-        color: white;
-        padding: 20px;
+    /* ── Header / HUD ─────────────────────────────── */
+    .hud {
         display: flex;
+        align-items: center;
         justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 15px;
+        padding: 14px 24px;
+        background: rgba(255,255,255,0.04);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
         flex-shrink: 0;
-        min-height: 100px;
+        z-index: 10;
+        gap: 12px;
+        flex-wrap: wrap;
     }
 
-    .game-header h2 {
-        margin: 0;
-        font-size: 1.5em;
-    }
-
-    .hud-stat {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .hud-label {
-        font-size: 0.8em;
-        opacity: 0.9;
-    }
-
-    .hud-value {
-        font-size: 1.5em;
-        font-weight: bold;
-    }
-
-    .game-board {
-        flex: 1;
-        position: relative;
-        background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
-        overflow: auto;
+    .hud-brand {
         display: flex;
         align-items: center;
-        justify-content: center;
-        padding: 30px;
+        gap: 10px;
+        min-width: 0;
     }
 
-    .memory-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 100px);
-        gap: 15px;
-        justify-content: center;
-    }
-
-    .memory-card {
-        width: 100px;
-        height: 100px;
-        background: white;
-        border: 2px solid #e2e8f0;
-        border-radius: 10px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.8em;
-        font-weight: bold;
-        text-align: center;
-        padding: 10px;
-        transition: all 0.2s ease;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        user-select: none;
-    }
-
-    .memory-card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-    }
-
-    .memory-card.flipped {
+    .hud-brand h2 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        white-space: nowrap;
         background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
-        color: white;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hud-badge {
+        font-size: 0.65rem;
+        padding: 3px 8px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.08);
+        color: rgba(255,255,255,0.6);
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .hud-stats {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .stat-chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.06);
+        font-size: 0.8rem;
+        white-space: nowrap;
+        transition: background 0.2s;
+    }
+
+    .stat-chip .icon { font-size: 0.9rem; opacity: 0.7; }
+    .stat-chip .label { color: rgba(255,255,255,0.5); font-size: 0.7rem; }
+    .stat-chip .value { font-weight: 700; font-size: 0.95rem; }
+    .stat-chip.timer .value { font-variant-numeric: tabular-nums; }
+    .stat-chip.mistakes .value { color: #f87171; }
+
+    .exit-chip {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        color: rgba(239, 68, 68, 0.7);
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.25s;
+    }
+
+    .exit-chip:hover {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: rgba(239, 68, 68, 0.4);
+        color: #f87171;
+    }
+
+    /* ── Mode selector ────────────────────────────── */
+    .mode-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 24px;
+        background: rgba(255,255,255,0.02);
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        flex-shrink: 0;
+    }
+
+    .mode-btn {
+        padding: 6px 18px;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: transparent;
+        color: rgba(255,255,255,0.5);
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.25s;
+    }
+
+    .mode-btn:hover {
+        background: rgba(255,255,255,0.06);
+        color: rgba(255,255,255,0.8);
+    }
+
+    .mode-btn.active {
+        background: linear-gradient(135deg, {{ $theme->color_primary }}cc, {{ $theme->color_secondary }}cc);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 2px 12px {{ $theme->color_primary }}44;
+    }
+
+    /* ── Board ────────────────────────────────────── */
+    .board {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        overflow: auto;
+        position: relative;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        width: 100%;
+        max-width: 520px;
+    }
+
+    /* ── Card ─────────────────────────────────────── */
+    .card {
+        aspect-ratio: 3 / 4;
+        perspective: 800px;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-style: preserve-3d;
+    }
+
+    .card.flipped .card-inner { transform: rotateY(180deg); }
+
+    .card-face {
+        position: absolute;
+        inset: 0;
+        border-radius: 14px;
+        backface-visibility: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    /* Front */
+    .card-front {
+        background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+        border: 1px solid rgba(255,255,255,0.08);
+        backdrop-filter: blur(6px);
+    }
+
+    .card-front::before {
+        content: '?';
+        font-size: 2rem;
+        font-weight: 800;
+        color: rgba(255,255,255,0.12);
+    }
+
+    .card:hover .card-front {
+        background: linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+        border-color: rgba(255,255,255,0.14);
+        transform: scale(1.03);
+    }
+
+    .card:hover .card-inner { transform: scale(1.03); }
+    .card.flipped:hover .card-inner { transform: rotateY(180deg) scale(1.03); }
+
+    /* Back */
+    .card-back {
+        transform: rotateY(180deg);
+        border: 2px solid transparent;
+        padding: 8px;
+    }
+
+    .card-back.type-character {
+        background: linear-gradient(145deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
         border-color: {{ $theme->color_primary }};
     }
 
-    .memory-card.matched {
-        background: var(--color-success);
-        color: white;
-        border-color: var(--color-success);
-        cursor: default;
-        pointer-events: none;
+    .card-back.type-pinyin,
+    .card-back.type-meaning {
+        background: linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+        border-color: rgba(255,255,255,0.15);
     }
 
-    .drawing-overlay {
+    .card-back .card-value {
+        font-weight: 700;
+        text-align: center;
+        line-height: 1.15;
+        word-break: break-word;
+    }
+
+    .card-back.type-character .card-value {
+        font-size: 2.2rem;
+        color: #fff;
+    }
+
+    .card-back.type-pinyin .card-value {
+        font-size: 1rem;
+        color: rgba(255,255,255,0.85);
+    }
+
+    .card-back.type-meaning .card-value {
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.85);
+    }
+
+    .card-back .card-sub {
+        font-size: 0.65rem;
+        color: rgba(255,255,255,0.45);
+        margin-top: 4px;
+    }
+
+    /* Matched state */
+    .card.matched .card-inner { transform: rotateY(180deg); }
+    .card.matched .card-back {
+        border-color: #34d399;
+        box-shadow: 0 0 20px rgba(52,211,153,0.25), inset 0 0 20px rgba(52,211,153,0.1);
+    }
+
+    .card.matched::after {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 16px;
+        border: 2px solid #34d399;
+        animation: matchPulse 1.5s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    /* Wrong flash */
+    .card.wrong .card-inner { animation: shake 0.4s ease; }
+    .card.wrong .card-back { border-color: #f87171; }
+
+    @keyframes matchPulse {
+        0%, 100% { opacity: 0.4; transform: scale(1); }
+        50% { opacity: 0; transform: scale(1.06); }
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: rotateY(180deg) translateX(0); }
+        20% { transform: rotateY(180deg) translateX(-6px); }
+        40% { transform: rotateY(180deg) translateX(6px); }
+        60% { transform: rotateY(180deg) translateX(-4px); }
+        80% { transform: rotateY(180deg) translateX(4px); }
+    }
+
+    /* ── Progress / Footer ────────────────────────── */
+    .footer-bar {
+        flex-shrink: 0;
+        padding: 10px 24px;
+        background: rgba(255,255,255,0.03);
+        border-top: 1px solid rgba(255,255,255,0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .timer-track {
+        width: 100%;
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(255,255,255,0.06);
+        overflow: hidden;
+    }
+
+    .timer-fill {
+        height: 100%;
+        border-radius: 2px;
+        background: linear-gradient(90deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
+        transition: width 1s linear;
+    }
+
+    .timer-fill.warning { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+
+    .footer-hint {
+        font-size: 0.72rem;
+        color: rgba(255,255,255,0.35);
+    }
+
+    /* ── Overlays shared ──────────────────────────── */
+    .overlay {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.7);
+        inset: 0;
+        background: rgba(0,0,0,0.75);
+        backdrop-filter: blur(6px);
         z-index: 500;
         align-items: center;
         justify-content: center;
-        flex-direction: column;
     }
 
-    .drawing-overlay.show {
-        display: flex;
-    }
+    .overlay.visible { display: flex; }
 
-    .drawing-container {
-        background: white;
-        border-radius: 15px;
-        padding: 30px;
+    /* ── Drawing overlay ──────────────────────────── */
+    .drawing-card {
+        background: #1e1b3a;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 20px;
+        padding: 32px;
         text-align: center;
-        max-width: 400px;
-        animation: slideUp 0.3s ease;
+        width: min(400px, 90vw);
+        animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    .drawing-container h3 {
-        color: var(--color-primary);
+    .drawing-card h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 6px;
+    }
+
+    .drawing-card .sub {
+        font-size: 0.82rem;
+        color: rgba(255,255,255,0.45);
         margin-bottom: 20px;
-        font-size: 1.5em;
     }
 
     #character-target-div {
-        margin: 20px auto;
-        background: #f8fafc;
-        border-radius: 8px;
+        margin: 0 auto 20px;
+        background: rgba(255,255,255,0.04);
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.06);
     }
 
-    .drawing-info {
-        font-size: 0.9em;
-        color: #666;
-        margin-bottom: 15px;
-    }
-
-    .drawing-buttons {
+    .drawing-actions {
         display: flex;
         gap: 10px;
         justify-content: center;
     }
 
-    .drawing-buttons button {
-        padding: 10px 20px;
-        border-radius: 8px;
+    .drawing-actions button {
+        padding: 10px 24px;
+        border-radius: 10px;
         border: none;
         font-weight: 600;
+        font-size: 0.85rem;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s;
     }
 
-    .game-footer {
-        background: #f8fafc;
-        padding: 15px 20px;
-        text-align: center;
-        border-top: 1px solid #e2e8f0;
-        flex-shrink: 0;
+    .btn-skip {
+        background: rgba(255,255,255,0.08);
+        color: rgba(255,255,255,0.6);
     }
 
-    .progress-bar {
-        width: 100%;
-        height: 6px;
-        background: #e2e8f0;
-        border-radius: 3px;
-        overflow: hidden;
-        margin-bottom: 10px;
+    .btn-skip:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+    .btn-confirm {
+        background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
+        color: #fff;
     }
 
-    .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
-        transition: width 0.1s linear;
-    }
+    .btn-confirm:hover { box-shadow: 0 4px 16px {{ $theme->color_primary }}66; transform: translateY(-1px); }
 
-    .game-over-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.7);
-        z-index: 1000;
-        align-items: center;
-        justify-content: center;
-        animation: fadeIn 0.3s ease;
-    }
-
-    .game-over-modal.show {
-        display: flex;
-    }
-
-    .modal-content {
-        background: white;
-        border-radius: 15px;
+    /* ── Game Over modal ──────────────────────────── */
+    .modal {
+        background: #1e1b3a;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 24px;
         padding: 40px;
         text-align: center;
-        max-width: 500px;
-        animation: slideUp 0.3s ease;
+        width: min(480px, 90vw);
+        animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    .modal-content h2 {
-        color: var(--color-primary);
-        margin-bottom: 20px;
-        font-size: 2em;
+    .modal h2 {
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin-bottom: 4px;
+        background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
-    .stats-grid {
+    .modal .subtitle {
+        color: rgba(255,255,255,0.4);
+        font-size: 0.85rem;
+        margin-bottom: 28px;
+    }
+
+    .result-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-        margin-bottom: 25px;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 28px;
     }
 
-    .stat-item {
-        background: #f8fafc;
-        padding: 15px;
-        border-radius: 8px;
+    .result-item {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 14px;
+        padding: 16px 12px;
     }
 
-    .stat-label {
-        font-size: 0.9em;
-        color: #666;
-        margin-bottom: 5px;
+    .result-item .r-label {
+        font-size: 0.7rem;
+        color: rgba(255,255,255,0.4);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 6px;
     }
 
-    .stat-value {
-        font-size: 1.8em;
-        font-weight: bold;
-        color: var(--color-primary);
+    .result-item .r-value {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #fff;
     }
 
-    .feedback-particle {
-        position: absolute;
-        width: 8px;
-        height: 8px;
+    .result-item .r-value.accent { color: {{ $theme->color_primary }}; }
+
+    .modal-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-actions button,
+    .modal-actions a {
+        padding: 12px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        border: none;
+        transition: all 0.25s;
+        text-decoration: none;
+        text-align: center;
+        display: block;
+    }
+
+    .modal-actions .btn-main {
+        background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
+        color: #fff;
+    }
+
+    .modal-actions .btn-main:hover { box-shadow: 0 6px 20px {{ $theme->color_primary }}55; transform: translateY(-2px); }
+
+    .modal-actions .btn-ghost {
+        background: rgba(255,255,255,0.06);
+        color: rgba(255,255,255,0.6);
+    }
+
+    .modal-actions .btn-ghost:hover { background: rgba(255,255,255,0.10); color: #fff; }
+
+    /* ── Particles ────────────────────────────────── */
+    .particle {
+        position: fixed;
+        width: 6px;
+        height: 6px;
         border-radius: 50%;
         pointer-events: none;
         z-index: 100;
         opacity: 1;
-        animation: particleOut 0.8s ease-out forwards;
+        animation: particleFly 0.7s ease-out forwards;
     }
 
-    .feedback-particle.correct {
-        background: var(--color-success);
-        box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    .particle.hit { background: #34d399; box-shadow: 0 0 6px #34d399; }
+    .particle.miss { background: #f87171; box-shadow: 0 0 6px #f87171; }
+
+    @keyframes particleFly {
+        0% { transform: translate(0,0) scale(1); opacity: 1; }
+        100% { transform: translate(var(--px), var(--py)) scale(0); opacity: 0; }
     }
 
-    @keyframes particleOut {
-        0% {
-            transform: translate(0, 0) scale(1);
-            opacity: 1;
-        }
-        100% {
-            transform: translate(var(--dx), var(--dy)) scale(0);
-            opacity: 0;
-        }
+    @keyframes popIn {
+        0% { opacity: 0; transform: scale(0.85) translateY(20px); }
+        100% { opacity: 1; transform: scale(1) translateY(0); }
     }
 
-    @keyframes slideUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    @keyframes cardEntry {
+        0% { opacity: 0; transform: scale(0.7) translateY(16px); }
+        100% { opacity: 1; transform: scale(1) translateY(0); }
     }
 
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
+    /* ── Responsive ───────────────────────────────── */
+    @media (max-width: 520px) {
+        .grid { grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 340px; }
+        .card-back.type-character .card-value { font-size: 1.6rem; }
+        .card-back.type-pinyin .card-value { font-size: 0.85rem; }
+        .card-back.type-meaning .card-value { font-size: 0.72rem; }
+        .hud { padding: 10px 14px; }
+        .stat-chip { padding: 4px 10px; font-size: 0.72rem; }
+    }
+
+    @media (max-width: 360px) {
+        .grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
     }
 </style>
 @endsection
 
 @section('content')
-<div class="game-container">
-    <!-- HUD (Heads Up Display) -->
-    <div class="game-header">
-        <h2 id="themeName">{{ $theme->name }}</h2>
+<div class="game-shell">
+    <!-- HUD -->
+    <div class="hud">
+        <div class="hud-brand">
+            <h2>{{ $theme->name }}</h2>
+            <span class="hud-badge">{{ $gameData['level_name'] }}</span>
+        </div>
 
-        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-            <div class="hud-stat">
-                <div class="hud-label">Puntuación</div>
-                <div class="hud-value" id="score">0</div>
+        <div class="hud-stats">
+            <div class="stat-chip">
+                <span class="icon">⭐</span>
+                <span class="value" id="score">0</span>
             </div>
-
-            <div class="hud-stat">
-                <div class="hud-label">Parejas</div>
-                <div class="hud-value" id="matches">0</div>
+            <div class="stat-chip">
+                <span class="icon">🃏</span>
+                <span class="label">Parejas</span>
+                <span class="value" id="matches">0/{{ $gameData['pairs_count'] }}</span>
             </div>
-
-            <div class="hud-stat">
-                <div class="hud-label">Errores</div>
-                <div class="hud-value" id="mistakes" style="color: var(--color-error);">0</div>
+            <div class="stat-chip mistakes">
+                <span class="icon">✕</span>
+                <span class="value" id="mistakes">0</span>
             </div>
-
-            <div class="hud-stat">
-                <div class="hud-label">Tiempo</div>
-                <div class="hud-value" id="timer">{{ $gameData['duration'] }}s</div>
+            <div class="stat-chip timer">
+                <span class="icon">⏱</span>
+                <span class="value" id="timer">{{ $gameData['duration'] }}s</span>
             </div>
-
-            <div class="hud-stat">
-                <div class="hud-label">Nivel</div>
-                <div class="hud-value" id="level">{{ $gameData['level'] }}</div>
-            </div>
+            <a href="{{ route('games.selectTheme', 'memory-game') }}" class="stat-chip exit-chip" onclick="return confirm('¿Seguro que quieres salir? Perderás el progreso.')">
+                <span class="icon">✕</span>
+                <span class="label">Salir</span>
+            </a>
         </div>
     </div>
 
-    <!-- Game Board -->
-    <div class="game-board" id="gameBoard">
-        <div class="memory-grid" id="memoryGrid"></div>
+    <!-- Mode selector -->
+    @php $modes = config('game.memory_game.modes'); @endphp
+    @if(count($modes) > 1)
+    <div class="mode-bar">
+        @foreach($modes as $key => $mode)
+        <button class="mode-btn {{ $gameData['mode'] === $key ? 'active' : '' }}" data-mode="{{ $key }}" onclick="switchMode('{{ $key }}')">
+            {{ $mode['name'] }}
+        </button>
+        @endforeach
+    </div>
+    @endif
+
+    <!-- Board -->
+    <div class="board" id="board">
+        <div class="grid" id="grid"></div>
     </div>
 
-    <!-- Progress Bar -->
-    <div class="game-footer">
-        <div class="progress-bar">
-            <div class="progress-fill" id="progressFill" style="width: 100%;"></div>
+    <!-- Footer -->
+    <div class="footer-bar">
+        <div class="timer-track">
+            <div class="timer-fill" id="timerFill" style="width:100%"></div>
         </div>
-        <small id="instructions">¡Encuentra las parejas de caracteres y su pinyin!</small>
+        <span class="footer-hint" id="hint">Encuentra las parejas de caracteres</span>
     </div>
 </div>
 
 <!-- Drawing Overlay -->
-<div class="drawing-overlay" id="drawingOverlay">
-    <div class="drawing-container">
-        <h3>¡Dibuja el carácter!</h3>
-        <p class="drawing-info">Escribe el carácter dibujando sus trazos</p>
-        <div id="character-target-div" style="width: 200px; height: 200px; margin: 0 auto;"></div>
-        <div class="drawing-buttons">
-            <button class="btn btn-secondary" onclick="resetDrawing()">Limpiar</button>
-            <button class="btn btn-primary" onclick="completeDrawing()">Continuar</button>
+<div class="overlay" id="drawingOverlay">
+    <div class="drawing-card">
+        <h3 id="drawingLabel">✍ Observa cómo se dibuja</h3>
+        <p class="sub" id="drawingSub">Memoriza el orden de los trazos</p>
+        <div id="character-target-div" style="width:200px;height:200px;"></div>
+        <div class="drawing-actions" id="drawingActions" style="display:none;">
+            <button class="btn-skip" onclick="skipDrawing()">Saltar</button>
+            <button class="btn-confirm" onclick="confirmDrawing()">Continuar</button>
         </div>
     </div>
 </div>
 
 <!-- Game Over Modal -->
-<div class="game-over-modal" id="gameOverModal">
-    <div class="modal-content">
+<div class="overlay" id="gameOverModal">
+    <div class="modal">
         <h2 id="resultTitle">¡Partida Finalizada!</h2>
+        <p class="subtitle" id="resultSubtitle">Buen intento</p>
 
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-label">Puntuación Final</div>
-                <div class="stat-value" id="finalScore">0</div>
+        <div class="result-grid">
+            <div class="result-item">
+                <div class="r-label">Puntuación</div>
+                <div class="r-value accent" id="finalScore">0</div>
             </div>
-            <div class="stat-item">
-                <div class="stat-label">Parejas Encontradas</div>
-                <div class="stat-value" id="finalMatches">0</div>
+            <div class="result-item">
+                <div class="r-label">Parejas</div>
+                <div class="r-value" id="finalMatches">0</div>
             </div>
-            <div class="stat-item">
-                <div class="stat-label">Errores</div>
-                <div class="stat-value" id="finalMistakes">0</div>
+            <div class="result-item">
+                <div class="r-label">Errores</div>
+                <div class="r-value" id="finalMistakes">0</div>
             </div>
-            <div class="stat-item">
-                <div class="stat-label">Tasa de Acierto</div>
-                <div class="stat-value" id="finalAccuracy">0%</div>
+            <div class="result-item">
+                <div class="r-label">Precisión</div>
+                <div class="r-value" id="finalAccuracy">0%</div>
             </div>
         </div>
 
-        <div style="display: flex; gap: 10px; flex-direction: column;">
-            <button class="btn btn-primary" onclick="location.href='{{ route('games.selectTheme', 'memory-game') }}'">
-                Volver a Seleccionar Tema
-            </button>
-            <button class="btn btn-secondary" onclick="location.href='{{ route('games.index') }}'">
-                Menú Principal
-            </button>
+        <div class="modal-actions">
+            <button class="btn-main" onclick="restartSameMode()">Jugar de Nuevo</button>
+            <a class="btn-ghost" href="{{ route('games.selectTheme', 'memory-game') }}">Cambiar Tema</a>
+            <a class="btn-ghost" href="{{ route('games.index') }}">Menú Principal</a>
         </div>
     </div>
-</div>
-
-<div style="text-align: center; margin-top: 20px;">
-    <button class="btn btn-secondary" onclick="location.href='{{ route('games.selectTheme', 'memory-game') }}'">
-        ← Seleccionar Otro Tema
-    </button>
 </div>
 @endsection
 
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@2.2.8/dist/hanzi-writer.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
 <script>
-    // Estado del juego
-    const gameState = {
+(function () {
+    'use strict';
+
+    /* ── Config from PHP ─────────────────────────── */
+    const CFG = {
         themeId: {{ $theme->id }},
         level: {{ $gameData['level'] }},
-        score: 0,
-        matches: 0,
-        mistakes: 0,
+        mode: '{{ $gameData["mode"] }}',
         duration: {{ $gameData['duration'] }},
-        timeRemaining: {{ $gameData['duration'] }},
-        isGameActive: false,
+        pairsCount: {{ $gameData['pairs_count'] }},
+        matchScore: {{ $gameData['match_score'] }},
+        bonusPerfect: {{ $gameData['drawing_bonus_perfect'] }},
+        bonusGood: {{ $gameData['drawing_bonus_good'] }},
+        csrf: '{{ csrf_token() }}',
+        routes: {
+            pairs: '/memory-game/api/' + {{ $theme->id }} + '/pairs',
+            match: '/memory-game/api/match',
+            mismatch: '/memory-game/api/mismatch',
+            drawing: '/memory-game/api/drawing',
+            end: '/memory-game/api/end',
+            gameUrl: '/memory-game/' + {{ $theme->id }},
+        },
+    };
+
+    /* ── State ───────────────────────────────────── */
+    const state = {
+        score: 0,
+        matchesFound: 0,
+        mistakes: 0,
+        timeLeft: CFG.duration,
+        active: false,
+        ended: false,
         cards: [],
         flipped: [],
-        matched: [],
-        currentDrawing: null,
+        matchedIds: new Set(),
+        timerRef: null,
+        drawingChar: null,
+        drawingMistakes: 0,
+        drawingPhase: null,
+        writer: null,
+        locked: false,
     };
 
-    // Elementos del DOM
-    const elements = {
-        gameBoard: document.getElementById('gameBoard'),
-        memoryGrid: document.getElementById('memoryGrid'),
-        score: document.getElementById('score'),
-        matches: document.getElementById('matches'),
-        mistakes: document.getElementById('mistakes'),
-        timer: document.getElementById('timer'),
-        level: document.getElementById('level'),
-        progressFill: document.getElementById('progressFill'),
-        gameOverModal: document.getElementById('gameOverModal'),
-        drawingOverlay: document.getElementById('drawingOverlay'),
-        finalScore: document.getElementById('finalScore'),
-        finalMatches: document.getElementById('finalMatches'),
-        finalMistakes: document.getElementById('finalMistakes'),
-        finalAccuracy: document.getElementById('finalAccuracy'),
+    /* ── DOM refs ────────────────────────────────── */
+    const $ = (id) => document.getElementById(id);
+    const dom = {
+        grid: $('grid'),
+        score: $('score'),
+        matches: $('matches'),
+        mistakes: $('mistakes'),
+        timer: $('timer'),
+        timerFill: $('timerFill'),
+        hint: $('hint'),
+        drawingOverlay: $('drawingOverlay'),
+        gameOverModal: $('gameOverModal'),
+        finalScore: $('finalScore'),
+        finalMatches: $('finalMatches'),
+        finalMistakes: $('finalMistakes'),
+        finalAccuracy: $('finalAccuracy'),
+        resultTitle: $('resultTitle'),
+        resultSubtitle: $('resultSubtitle'),
     };
 
-    let writer = null;
+    /* ── API helper ──────────────────────────────── */
+    async function api(url, body = {}) {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CFG.csrf },
+            body: JSON.stringify(body),
+        });
+        return res.json();
+    }
 
-    // Inicializar el juego
-    async function initializeGame() {
+    /* ── Sound ───────────────────────────────────── */
+    let audioCtx;
+    function playTone(freq, type, dur) {
         try {
-            const response = await fetch('/memory-game/api/' + gameState.themeId + '/pairs', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                },
-                body: JSON.stringify({
-                    level: gameState.level,
-                }),
-            });
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + dur);
+        } catch (_) {}
+    }
 
-            const data = await response.json();
-            if (data.success) {
-                gameState.cards = data.pairs;
-                renderCards();
-                startGame();
-            }
-        } catch (error) {
-            console.error('Error inicializando juego:', error);
+    function soundCorrect() { playTone(880, 'triangle', 0.15); setTimeout(() => playTone(1320, 'triangle', 0.12), 80); }
+    function soundWrong() { playTone(220, 'square', 0.2); }
+    function soundMatch() { playTone(660, 'triangle', 0.1); setTimeout(() => playTone(990, 'triangle', 0.1), 60); setTimeout(() => playTone(1320, 'triangle', 0.15), 120); }
+
+    /* ── Particles ───────────────────────────────── */
+    function burst(x, y, cls, count = 8) {
+        for (let i = 0; i < count; i++) {
+            const p = document.createElement('span');
+            p.className = 'particle ' + cls;
+            const angle = (Math.PI * 2 * i) / count;
+            const dist = 18 + Math.random() * 28;
+            p.style.left = x + 'px';
+            p.style.top = y + 'px';
+            p.style.setProperty('--px', Math.cos(angle) * dist + 'px');
+            p.style.setProperty('--py', Math.sin(angle) * dist + 'px');
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 700);
         }
     }
 
-    // Renderizar tarjetas de memoria
+    /* ── Render cards ────────────────────────────── */
     function renderCards() {
-        elements.memoryGrid.innerHTML = '';
-        gameState.cards.forEach((card, index) => {
-            const cardDiv = document.createElement('div');
-            cardDiv.className = 'memory-card';
-            cardDiv.id = `card-${index}`;
-            cardDiv.textContent = '?';
-            cardDiv.onclick = () => flipCard(index);
-            elements.memoryGrid.appendChild(cardDiv);
+        dom.grid.innerHTML = '';
+        state.cards.forEach((card, i) => {
+            const el = document.createElement('div');
+            el.className = 'card';
+            el.dataset.index = i;
+            el.style.animation = `cardEntry 0.35s ease ${i * 0.04}s both`;
+
+            const typeClass = 'type-' + card.type;
+
+            el.innerHTML = `
+                <div class="card-inner">
+                    <div class="card-face card-front"></div>
+                    <div class="card-face card-back ${typeClass}">
+                        <span class="card-value">${escapeHtml(card.display)}</span>
+                        ${card.type !== 'character' ? '<span class="card-sub">' + escapeHtml(card.hanzi || '') + '</span>' : ''}
+                    </div>
+                </div>`;
+
+            el.addEventListener('click', () => onCardClick(i));
+            dom.grid.appendChild(el);
         });
     }
 
-    // Voltear tarjeta
-    function flipCard(index) {
-        if (!gameState.isGameActive) return;
-        if (gameState.flipped.includes(index) || gameState.matched.includes(index)) return;
-        if (gameState.flipped.length >= 2) return;
+    function escapeHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
 
-        gameState.flipped.push(index);
-        const card = gameState.cards[index];
-        const cardDiv = document.getElementById(`card-${index}`);
+    /* ── Card click ──────────────────────────────── */
+    function onCardClick(index) {
+        if (!state.active || state.locked) return;
+        if (state.matchedIds.has(index) || state.flipped.includes(index)) return;
+        if (state.flipped.length >= 2) return;
 
-        cardDiv.classList.add('flipped');
-        cardDiv.textContent = card.type === 'character' ? card.value : card.value;
+        state.flipped.push(index);
+        const el = dom.grid.children[index];
+        el.classList.add('flipped');
 
-        if (gameState.flipped.length === 2) {
-            setTimeout(checkMatch, 800);
+        if (state.flipped.length === 2) {
+            state.locked = true;
+            setTimeout(checkMatch, 700);
         }
     }
 
-    // Verificar si las dos tarjetas coinciden
-    async function checkMatch() {
-        const [idx1, idx2] = gameState.flipped;
-        const card1 = gameState.cards[idx1];
-        const card2 = gameState.cards[idx2];
-
-        const isMatch = card1.pair_id === card2.pair_id;
+    /* ── Check match ─────────────────────────────── */
+    function checkMatch() {
+        const [i1, i2] = state.flipped;
+        const c1 = state.cards[i1];
+        const c2 = state.cards[i2];
+        const isMatch = c1.pair_id === c2.pair_id;
 
         if (isMatch) {
-            // Acierto: mostrar en verde y comenzar el dibujo
-            gameState.matched.push(idx1, idx2);
-            gameState.matches++;
-            gameState.flipped = [];
+            state.matchedIds.add(i1);
+            state.matchedIds.add(i2);
+            state.matchesFound++;
+            state.score += CFG.matchScore;
+            state.flipped = [];
+            state.locked = false;
+            state.active = false;
+
+            const el1 = dom.grid.children[i1];
+            const el2 = dom.grid.children[i2];
+            el1.classList.add('matched');
+            el2.classList.add('matched');
+
+            soundMatch();
+
+            const r1 = el1.getBoundingClientRect();
+            const r2 = el2.getBoundingClientRect();
+            burst(r1.left + r1.width / 2, r1.top + r1.height / 2, 'hit');
+            burst(r2.left + r2.width / 2, r2.top + r2.height / 2, 'hit');
+
+            api(CFG.routes.match, {
+                theme_id: CFG.themeId,
+                current_score: state.score,
+                current_hits: state.matchesFound - 1,
+                current_mistakes: state.mistakes,
+                current_level: CFG.level,
+            }).catch(() => {});
+
             updateHUD();
-            playFeedbackSound(true);
-            createFeedbackBurst(document.getElementById(`card-${idx1}`).getBoundingClientRect(), true);
 
-            // Mostrar el overlay de dibujo
-            setTimeout(() => {
-                showDrawingChallenge(card1.hanzi || card2.hanzi);
-            }, 500);
+            const hanzi = c1.type === 'character' ? c1.value : (c1.hanzi || c2.hanzi);
+            if (hanzi) {
+                setTimeout(() => showDrawing(hanzi), 400);
+            } else {
+                state.active = true;
+            }
 
-            // Verificar si ganó
-            if (gameState.matched.length === gameState.cards.length) {
-                setTimeout(endGame, 2000);
+            if (state.matchesFound === CFG.pairsCount) {
+                setTimeout(endGame, 1500);
             }
         } else {
-            // Error: voltear de vuelta
-            const cardDiv1 = document.getElementById(`card-${idx1}`);
-            const cardDiv2 = document.getElementById(`card-${idx2}`);
-            cardDiv1.classList.remove('flipped');
-            cardDiv2.classList.remove('flipped');
-            cardDiv1.textContent = '?';
-            cardDiv2.textContent = '?';
-            gameState.mistakes++;
-            gameState.flipped = [];
+            soundWrong();
+
+            const el1 = dom.grid.children[i1];
+            const el2 = dom.grid.children[i2];
+            el1.classList.add('wrong');
+            el2.classList.add('wrong');
+
+            setTimeout(() => {
+                el1.classList.remove('flipped', 'wrong');
+                el2.classList.remove('flipped', 'wrong');
+            }, 500);
+
+            state.mistakes++;
+            state.flipped = [];
+            state.locked = false;
             updateHUD();
-            playFeedbackSound(false);
+
+            api(CFG.routes.mismatch, {
+                theme_id: CFG.themeId,
+                current_score: state.score,
+                current_hits: state.matchesFound,
+                current_mistakes: state.mistakes - 1,
+                current_level: CFG.level,
+            }).catch(() => {});
         }
     }
 
-    // Mostrar desafío de dibujo
-    async function showDrawingChallenge(hanzi) {
-        gameState.currentDrawing = {
-            character: hanzi,
-            mistakes: 0,
-        };
+    /* ── Drawing challenge ───────────────────────── */
+    function showDrawing(hanzi) {
+        state.active = false;
+        state.locked = true;
+        stopTimer();
+        state.drawingChar = hanzi;
+        state.drawingMistakes = 0;
+        state.drawingPhase = 'animating';
+        dom.drawingOverlay.classList.add('visible');
+        updateDrawingUI();
 
-        elements.drawingOverlay.classList.add('show');
+        if (state.writer) { state.writer.destroy(); state.writer = null; }
+        document.getElementById('character-target-div').innerHTML = '';
 
-        // Limpiar escritor anterior
-        if (writer) {
-            writer.destroy();
-        }
+        requestAnimationFrame(() => {
+            try {
+                state.writer = HanziWriter.create('character-target-div', hanzi, {
+                    width: 200,
+                    height: 200,
+                    padding: 5,
+                    showCharacter: false,
+                    showOutline: true,
+                    outlineColor: 'rgba(255, 255, 255, 0.2)',
+                    drawingColor: '#ffffff',
+                    highlightColor: '#34d399',
+                    strokeAnimationSpeed: 1.5,
+                    delayBetweenStrokes: 200,
+                    strokeColor: 'rgba(255, 255, 255, 0.85)',
+                });
 
-        // Crear nuevo escritor
-        writer = HanziWriter.create('character-target-div', hanzi, {
-            width: 200,
-            height: 200,
-            showCharacter: false,
-            padding: 5,
-            strokeAnimationSpeed: 2,
-        });
-
-        writer.quiz({
-            onMistake: (strokeData) => {
-                gameState.currentDrawing.mistakes++;
-                console.log(`Trazo incorrecto. Errores: ${strokeData.totalMistakes}`);
-            },
-            onCorrectStroke: (strokeData) => {
-                console.log(`✓ Trazo ${strokeData.strokeNum} correcto!`);
-            },
-            onComplete: (summaryData) => {
-                console.log(`¡Dibujado completo! Errores: ${summaryData.totalMistakes}`);
-            },
+                state.writer.animateCharacter({
+                    onComplete: () => {
+                        state.drawingPhase = 'quiz';
+                        updateDrawingUI();
+                        state.writer.quiz({
+                            onMistake: () => { state.drawingMistakes++; },
+                            onCorrectStroke: () => {},
+                            onComplete: () => {
+                                state.drawingPhase = 'complete';
+                                updateDrawingUI();
+                            },
+                        });
+                    },
+                });
+            } catch (e) {
+                console.warn('HanziWriter error:', e);
+                state.drawingPhase = 'quiz';
+                updateDrawingUI();
+            }
         });
     }
 
-    // Continuar después del dibujo
-    async function completeDrawing() {
-        if (!gameState.currentDrawing) return;
+    function updateDrawingUI() {
+        const label = document.getElementById('drawingLabel');
+        const sub = document.getElementById('drawingSub');
+        const actions = document.getElementById('drawingActions');
+        if (!label) return;
+
+        switch (state.drawingPhase) {
+            case 'animating':
+                label.textContent = '✍ Observa cómo se dibuja';
+                sub.textContent = 'Memoriza el orden de los trazos';
+                actions.style.display = 'none';
+                break;
+            case 'quiz':
+                label.textContent = '✍ Dibuja el carácter';
+                sub.textContent = 'Traza los trazos en orden correcto';
+                actions.style.display = 'flex';
+                break;
+            case 'complete':
+                label.textContent = '¡Correcto!';
+                sub.textContent = 'Presiona continuar';
+                actions.style.display = 'flex';
+                break;
+        }
+    }
+
+    window.confirmDrawing = async function () {
+        if (!state.drawingChar) return;
 
         try {
-            const response = await fetch('/memory-game/api/drawing', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                },
-                body: JSON.stringify({
-                    theme_id: gameState.themeId,
-                    current_score: gameState.score,
-                    current_hits: gameState.matches,
-                    current_mistakes: gameState.mistakes,
-                    current_level: gameState.level,
-                    drawing_mistakes: gameState.currentDrawing.mistakes,
-                }),
+            const data = await api(CFG.routes.drawing, {
+                theme_id: CFG.themeId,
+                current_score: state.score,
+                current_hits: state.matchesFound,
+                current_mistakes: state.mistakes,
+                current_level: CFG.level,
+                drawing_mistakes: state.drawingMistakes,
             });
 
-            const data = await response.json();
-            if (data.success) {
-                gameState.score = data.new_score;
+            if (data && data.success) {
+                state.score = data.new_score;
                 updateHUD();
             }
-        } catch (error) {
-            console.error('Error guardando dibujo:', error);
+        } catch (err) {
+            console.warn('Error saving drawing:', err);
         }
 
-        elements.drawingOverlay.classList.remove('show');
-        gameState.currentDrawing = null;
-    }
+        closeDrawing();
+    };
 
-    // Limpiar dibujo
-    function resetDrawing() {
-        if (writer) {
-            writer.destroy();
-            writer = null;
-            setTimeout(() => {
-                showDrawingChallenge(gameState.currentDrawing.character);
-            }, 100);
+    window.skipDrawing = function () { closeDrawing(); };
+
+    function closeDrawing() {
+        dom.drawingOverlay.classList.remove('visible');
+        try { if (state.writer) { state.writer.destroy(); } } catch (_) {}
+        state.writer = null;
+        state.drawingChar = null;
+        state.drawingPhase = null;
+        state.locked = false;
+        if (!state.ended) {
+            state.active = true;
+            startTimer();
         }
     }
 
-    // Actualizar HUD
+    /* ── Mode switching ──────────────────────────── */
+    window.switchMode = function (mode) {
+        CFG.mode = mode;
+        document.querySelectorAll('.mode-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.mode === mode);
+        });
+        resetGame();
+    };
+
+    /* ── HUD ─────────────────────────────────────── */
     function updateHUD() {
-        elements.score.textContent = gameState.score;
-        elements.matches.textContent = gameState.matches;
-        elements.mistakes.textContent = gameState.mistakes;
+        dom.score.textContent = state.score;
+        dom.matches.textContent = state.matchesFound + '/' + CFG.pairsCount;
+        dom.mistakes.textContent = state.mistakes;
+
+        const hints = {
+            'hanzi-pinyin': 'Encuentra las parejas Hanzi ↔ Pinyin',
+            'hanzi-meaning': 'Encuentra las parejas Hanzi ↔ Significado',
+        };
+        dom.hint.textContent = hints[CFG.mode] || hints['hanzi-pinyin'];
     }
 
-    // Sonidos
-    function playFeedbackSound(isCorrect) {
-        try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = ctx.createOscillator();
-            const gainNode = ctx.createGain();
+    /* ── Timer ───────────────────────────────────── */
+    function startTimer() {
+        if (state.timerRef) return;
+        state.timerRef = setInterval(() => {
+            state.timeLeft--;
+            dom.timer.textContent = state.timeLeft + 's';
 
-            oscillator.type = isCorrect ? 'triangle' : 'square';
-            oscillator.frequency.setValueAtTime(isCorrect ? 880 : 220, ctx.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(isCorrect ? 1320 : 180, ctx.currentTime + 0.15);
+            const pct = (state.timeLeft / CFG.duration) * 100;
+            dom.timerFill.style.width = pct + '%';
+            dom.timerFill.classList.toggle('warning', pct < 25);
 
-            gainNode.gain.setValueAtTime(0.03, ctx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.2);
-
-            oscillator.connect(gainNode);
-            gainNode.connect(ctx.destination);
-            oscillator.start();
-            oscillator.stop(ctx.currentTime + 0.2);
-        } catch (error) {
-            console.warn('No se pudo reproducir el sonido:', error);
-        }
-    }
-
-    // Partículas
-    function createFeedbackBurst(rect, isCorrect) {
-        const burstCount = 10;
-        for (let i = 0; i < burstCount; i++) {
-            const particle = document.createElement('span');
-            particle.className = `feedback-particle ${isCorrect ? 'correct' : 'incorrect'}`;
-
-            const angle = (Math.PI * 2 * i) / burstCount;
-            const distance = 20 + Math.random() * 35;
-            const dx = Math.cos(angle) * distance;
-            const dy = Math.sin(angle) * distance - 10;
-
-            particle.style.left = `${rect.left + rect.width / 2}px`;
-            particle.style.top = `${rect.top + rect.height / 2}px`;
-            particle.style.setProperty('--dx', `${dx}px`);
-            particle.style.setProperty('--dy', `${dy}px`);
-
-            elements.gameBoard.appendChild(particle);
-            setTimeout(() => particle.remove(), 800);
-        }
-    }
-
-    // Iniciar juego
-    function startGame() {
-        gameState.isGameActive = true;
-        gameState.timeRemaining = gameState.duration;
-
-        const timerInterval = setInterval(() => {
-            gameState.timeRemaining--;
-            elements.timer.textContent = gameState.timeRemaining + 's';
-
-            const progress = (gameState.timeRemaining / gameState.duration) * 100;
-            elements.progressFill.style.width = progress + '%';
-
-            if (gameState.timeRemaining <= 0) {
-                clearInterval(timerInterval);
+            if (state.timeLeft <= 0) {
+                clearInterval(state.timerRef);
                 endGame();
             }
         }, 1000);
     }
 
-    // Finalizar juego
+    function stopTimer() {
+        if (state.timerRef) { clearInterval(state.timerRef); state.timerRef = null; }
+    }
+
+    /* ── End game ────────────────────────────────── */
     async function endGame() {
-        gameState.isGameActive = false;
+        if (state.ended) return;
+        state.ended = true;
+        state.active = false;
+        stopTimer();
+        closeDrawing();
 
+        await api(CFG.routes.end, {
+            theme_id: CFG.themeId,
+            score: state.score,
+            hits: state.matchesFound,
+            mistakes: state.mistakes,
+            duration: CFG.duration - state.timeLeft,
+            level: CFG.level,
+        });
+
+        const total = state.matchesFound + state.mistakes;
+        const accuracy = total > 0 ? Math.round((state.matchesFound / total) * 100) : 0;
+
+        if (state.matchesFound === CFG.pairsCount) {
+            dom.resultTitle.textContent = '¡Felicidades!';
+            dom.resultSubtitle.textContent = 'Completaste todas las parejas';
+        } else {
+            dom.resultTitle.textContent = '¡Tiempo Agotado!';
+            dom.resultSubtitle.textContent = 'Intenta de nuevo para mejorar';
+        }
+
+        dom.finalScore.textContent = state.score;
+        dom.finalMatches.textContent = state.matchesFound + '/' + CFG.pairsCount;
+        dom.finalMistakes.textContent = state.mistakes;
+        dom.finalAccuracy.textContent = accuracy + '%';
+        dom.gameOverModal.classList.add('visible');
+    }
+
+    /* ── Restart ─────────────────────────────────── */
+    window.restartSameMode = function () {
+        dom.gameOverModal.classList.remove('visible');
+        resetGame();
+    };
+
+    async function resetGame() {
+        stopTimer();
+        Object.assign(state, {
+            score: 0, matchesFound: 0, mistakes: 0,
+            timeLeft: CFG.duration, active: false, ended: false,
+            cards: [], flipped: [], matchedIds: new Set(),
+            locked: false, drawingChar: null, drawingMistakes: 0, drawingPhase: null,
+        });
+        dom.timer.textContent = CFG.duration + 's';
+        dom.timerFill.style.width = '100%';
+        dom.timerFill.classList.remove('warning');
+        dom.gameOverModal.classList.remove('visible');
+        dom.drawingOverlay.classList.remove('visible');
+        updateHUD();
+        await initGame();
+    }
+
+    /* ── Init ────────────────────────────────────── */
+    async function initGame() {
         try {
-            const response = await fetch('/memory-game/api/end', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                },
-                body: JSON.stringify({
-                    theme_id: gameState.themeId,
-                    score: gameState.score,
-                    hits: gameState.matches,
-                    mistakes: gameState.mistakes,
-                    duration: gameState.duration,
-                    level: gameState.level,
-                }),
-            });
-
-            const data = await response.json();
-
-            // Mostrar modal de fin de juego
-            const totalAttempts = gameState.matches + gameState.mistakes;
-            const accuracy = totalAttempts > 0 ? (gameState.matches / totalAttempts) * 100 : 0;
-
-            elements.finalScore.textContent = gameState.score;
-            elements.finalMatches.textContent = gameState.matches;
-            elements.finalMistakes.textContent = gameState.mistakes;
-            elements.finalAccuracy.textContent = Math.round(accuracy) + '%';
-
-            elements.gameOverModal.classList.add('show');
-        } catch (error) {
-            console.error('Error finalizando juego:', error);
+            const data = await api(CFG.routes.pairs, { level: CFG.level, mode: CFG.mode });
+            if (data.success) {
+                state.cards = data.pairs;
+                renderCards();
+                state.active = true;
+                updateHUD();
+                startTimer();
+            }
+        } catch (err) {
+            console.error('Error initializing game:', err);
         }
     }
 
-    // Validar que existe el token CSRF
-    if (!document.querySelector('meta[name="csrf-token"]')) {
-        const meta = document.createElement('meta');
-        meta.name = 'csrf-token';
-        meta.content = '{{ csrf_token() }}';
-        document.head.appendChild(meta);
-    }
-
-    // Iniciar juego cuando carga la página
-    window.addEventListener('load', initializeGame);
+    /* ── Bootstrap ───────────────────────────────── */
+    updateHUD();
+    initGame();
+})();
 </script>
 @endsection

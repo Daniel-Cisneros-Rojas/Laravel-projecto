@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Games\Services\MemoryGameService;
 use App\Games\Repositories\ThemeRepository;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Illuminate\Http\JsonResponse;
 
 class MemoryGameController extends Controller
 {
@@ -16,15 +18,16 @@ class MemoryGameController extends Controller
     /**
      * Mostrar pantalla del juego de memoria
      */
-    public function show(int $themeId)
+    public function show(int $themeId, Request $request): View
     {
         $theme = $this->themeRepository->getById($themeId);
         if (!$theme) {
             abort(404, 'Tema no encontrado');
         }
 
-        $level = request()->input('level', 1);
-        $gameData = $this->memoryGameService->initializeGame($themeId, $level);
+        $level = (int) $request->input('level', 1);
+        $mode = $request->input('mode', config('game.memory_game.default_mode'));
+        $gameData = $this->memoryGameService->initializeGame($themeId, $mode, $level);
 
         return view('memory-game.game', [
             'theme' => $theme,
@@ -35,24 +38,31 @@ class MemoryGameController extends Controller
     /**
      * API: Generar pares para el memorama
      */
-    public function generatePairs(Request $request, int $themeId)
+    public function generatePairs(Request $request, int $themeId): JsonResponse
     {
-        $level = $request->input('level', 1);
-        $gameData = $this->memoryGameService->initializeGame($themeId, $level);
-        $pairs = $this->memoryGameService->generateMemoryPairs($themeId, $level, $gameData['pairs_count']);
+        $level = (int) $request->input('level', 1);
+        $mode = $request->input('mode', config('game.memory_game.default_mode'));
+        $gameData = $this->memoryGameService->initializeGame($themeId, $mode, $level);
+        $pairs = $this->memoryGameService->generateMemoryPairs(
+            $themeId,
+            $level,
+            $gameData['pairs_count'],
+            $mode
+        );
 
         return response()->json([
             'success' => true,
             'pairs' => $pairs,
             'pairs_count' => count($pairs) / 2,
             'theme_id' => $themeId,
+            'mode' => $mode,
         ]);
     }
 
     /**
      * API: Registrar acierto en memoria
      */
-    public function recordMatch(Request $request)
+    public function recordMatch(Request $request): JsonResponse
     {
         $data = $request->validate([
             'theme_id' => 'required|integer',
@@ -76,7 +86,7 @@ class MemoryGameController extends Controller
     /**
      * API: Registrar error en memoria
      */
-    public function recordMismatch(Request $request)
+    public function recordMismatch(Request $request): JsonResponse
     {
         $data = $request->validate([
             'theme_id' => 'required|integer',
@@ -100,7 +110,7 @@ class MemoryGameController extends Controller
     /**
      * API: Registrar éxito en dibujo
      */
-    public function recordDrawing(Request $request)
+    public function recordDrawing(Request $request): JsonResponse
     {
         $data = $request->validate([
             'theme_id' => 'required|integer',
@@ -126,7 +136,7 @@ class MemoryGameController extends Controller
     /**
      * API: Finalizar juego
      */
-    public function endGame(Request $request)
+    public function endGame(Request $request): JsonResponse
     {
         $data = $request->validate([
             'theme_id' => 'required|integer',

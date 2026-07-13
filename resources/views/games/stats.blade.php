@@ -3,11 +3,12 @@
 @section('content')
 <div class="header">
     <h1>📊 Estadísticas Generales</h1>
-    <p>Tu progreso en el juego</p>
+    <p>Tu progreso en los juegos</p>
 </div>
 
-<div class="game-card">
-    <h2 style="color: var(--color-primary); margin-bottom: 20px;">Catch the Character</h2>
+<!-- Catch the Character -->
+<div class="game-card" style="margin-bottom: 24px;">
+    <h2 style="color: var(--color-primary); margin-bottom: 20px;">🎯 Catch the Character</h2>
 
     <div class="grid grid-2" style="margin-bottom: 20px;">
         <div style="background: #f8fafc; padding: 20px; border-radius: 8px;">
@@ -38,11 +39,46 @@
             </div>
         </div>
     </div>
+</div>
 
-    <div style="text-align: center; margin-top: 30px;">
-        <a href="{{ route('games.index') }}" class="btn btn-primary">
-            Volver al Menú
-        </a>
+<!-- Memory Hanzi -->
+<div class="game-card">
+    <h2 style="color: var(--color-primary); margin-bottom: 20px;">🎴 Memory Hanzi</h2>
+
+    <div class="grid grid-2" style="margin-bottom: 20px;">
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Total de Partidas</div>
+            <div style="font-size: 2em; font-weight: bold; color: var(--color-primary);">
+                {{ $memoryGameStats['total_sessions'] ?? 0 }}
+            </div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Puntuación Promedio</div>
+            <div style="font-size: 2em; font-weight: bold; color: var(--color-primary);">
+                {{ number_format($memoryGameStats['average_score'] ?? 0, 0) }}
+            </div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Precisión Promedio</div>
+            <div style="font-size: 2em; font-weight: bold; color: var(--color-success);">
+                {{ number_format($memoryGameStats['average_accuracy'] ?? 0, 1) }}%
+            </div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Mejor Puntuación</div>
+            <div style="font-size: 2em; font-weight: bold; color: var(--color-warning);">
+                {{ number_format($memoryGameStats['best_score'] ?? 0, 0) }}
+            </div>
+        </div>
     </div>
+</div>
+
+<div style="text-align: center; margin-top: 30px;">
+    <a href="{{ route('games.index') }}" class="btn btn-primary">
+        Volver al Menú
+    </a>
 </div>
 @endsection

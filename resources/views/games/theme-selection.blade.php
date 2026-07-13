@@ -2,15 +2,15 @@
 
 @section('content')
 <div class="header">
-    <h1>🎮 Selecciona un Tema</h1>
-    <p>Elige la categoría que quieres aprender</p>
+    <h1>{{ $game['icon'] }} Selecciona un Tema</h1>
+    <p>{{ $game['name'] }} — {{ $game['description'] }}</p>
 </div>
 
 <div class="grid grid-3">
     @foreach($themes as $theme)
-    <a href="{{ route('catchTheCharacter.show', $theme->id) }}" class="game-card" style="text-decoration: none; cursor: pointer; display: block; transition: all 0.3s ease;">
+    <a href="{{ route($game['route'], $theme->id) }}" class="game-card" style="text-decoration: none; cursor: pointer; display: block; transition: all 0.3s ease;">
         <div style="display: flex; align-items: center; justify-content: center; height: 120px; background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }}); border-radius: 10px; margin-bottom: 20px;">
-            <span style="font-size: 3em;">{{ $theme->name[0] }}</span>
+            <span style="font-size: 3em; filter: brightness(0) invert(1);">{{ $theme->name[0] }}</span>
         </div>
 
         <h3 style="color: var(--color-primary); margin-bottom: 10px; text-align: center;">{{ $theme->name }}</h3>
