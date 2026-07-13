@@ -89,10 +89,33 @@
 
     .character-card.correct {
         border: 3px solid var(--color-success);
+        animation: correctPop 0.35s ease;
     }
 
     .character-card.incorrect {
         border: 3px solid var(--color-error);
+        animation: incorrectShake 0.35s ease;
+    }
+
+    .feedback-particle {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 100;
+        opacity: 1;
+        animation: particleOut 0.8s ease-out forwards;
+    }
+
+    .feedback-particle.correct {
+        background: var(--color-success);
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    }
+
+    .feedback-particle.incorrect {
+        background: var(--color-error);
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
     }
 
     .hanzi {
@@ -185,6 +208,30 @@
         font-size: 1.8em;
         font-weight: bold;
         color: var(--color-primary);
+    }
+
+    @keyframes correctPop {
+        0% { transform: scale(0.92); }
+        50% { transform: scale(1.08); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes incorrectShake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-4px); }
+        50% { transform: translateX(4px); }
+        75% { transform: translateX(-2px); }
+    }
+
+    @keyframes particleOut {
+        0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(var(--dx), var(--dy)) scale(0);
+            opacity: 0;
+        }
     }
 
     @media (max-width: 768px) {
@@ -376,6 +423,7 @@
     const cardWidth = 100;
     const spacing = 15;
     let maxColumns = 4;
+    let audioContext = null;
 
     // Calcular número de columnas
     function calculateColumns() {
@@ -396,8 +444,8 @@
         const boardWidth = elements.gameBoard.offsetWidth;
         const leftPosition = (boardWidth / maxColumns) * columnIndex + spacing;
         
-        // Tiempo de caída: 5-6 segundos (suave)
-        const fallTime = 5000 + Math.random() * 1000;
+        // Tiempo de caída más lento para que parezca más natural
+        const fallTime = 7000 + Math.random() * 2000;
         const startTime = Date.now();
         
         const topStart = -100;
@@ -408,11 +456,8 @@
             const progress = Math.min(1, elapsed / fallTime);
 
             if (progress >= 1) {
-                // Carácter llegó al fondo
+                // El carácter llega al fondo y desaparece sin penalizar
                 card.remove();
-                if (character.is_correct) {
-                    handleMissedCharacter();
-                }
                 return;
             }
 
@@ -424,9 +469,65 @@
             requestAnimationFrame(animate);
         }
 
-        card.onclick = () => handleCharacterClick(character, card);
+        card.onclick = (event) => handleCharacterClick(character, card, event);
         elements.gameBoard.appendChild(card);
         animate();
+    }
+
+    function ensureAudio() {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+
+        return audioContext;
+    }
+
+    function playFeedbackSound(isCorrect) {
+        try {
+            const ctx = ensureAudio();
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+
+            oscillator.type = isCorrect ? 'triangle' : 'square';
+            oscillator.frequency.setValueAtTime(isCorrect ? 880 : 220, ctx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(isCorrect ? 1320 : 180, ctx.currentTime + 0.15);
+
+            gainNode.gain.setValueAtTime(0.03, ctx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.2);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            oscillator.start();
+            oscillator.stop(ctx.currentTime + 0.2);
+        } catch (error) {
+            console.warn('No se pudo reproducir el sonido:', error);
+        }
+    }
+
+    function createFeedbackBurst(x, y, isCorrect) {
+        const burstCount = 10;
+
+        for (let i = 0; i < burstCount; i++) {
+            const particle = document.createElement('span');
+            particle.className = `feedback-particle ${isCorrect ? 'correct' : 'incorrect'}`;
+
+            const angle = (Math.PI * 2 * i) / burstCount;
+            const distance = 20 + Math.random() * 35;
+            const dx = Math.cos(angle) * distance;
+            const dy = Math.sin(angle) * distance - 10;
+
+            particle.style.left = `${x - elements.gameBoard.getBoundingClientRect().left}px`;
+            particle.style.top = `${y - elements.gameBoard.getBoundingClientRect().top}px`;
+            particle.style.setProperty('--dx', `${dx}px`);
+            particle.style.setProperty('--dy', `${dy}px`);
+
+            elements.gameBoard.appendChild(particle);
+            setTimeout(() => particle.remove(), 800);
+        }
     }
 
     // Generar caracteres esporádicamente en columnas
@@ -489,13 +590,18 @@
     }
 
     // Manejar clic en carácter
-    async function handleCharacterClick(character, cardElement) {
+    async function handleCharacterClick(character, cardElement, event) {
         if (!gameState.isGameActive) return;
 
         const isCorrect = character.is_correct;
+        const clickX = event ? event.clientX : cardElement.getBoundingClientRect().left + 40;
+        const clickY = event ? event.clientY : cardElement.getBoundingClientRect().top + 20;
 
         // Visual feedback
         cardElement.classList.add(isCorrect ? 'correct' : 'incorrect');
+        cardElement.style.pointerEvents = 'none';
+        createFeedbackBurst(clickX, clickY, isCorrect);
+        playFeedbackSound(isCorrect);
 
         try {
             const response = await fetch('/catch-the-character/api/click', {
@@ -524,7 +630,6 @@
 
                 updateHUD();
 
-                // Reproducir sonido (será implementado después)
                 if (isCorrect) {
                     console.log('✓ Correcto!');
                 } else {

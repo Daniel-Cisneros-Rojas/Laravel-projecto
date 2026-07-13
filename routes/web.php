@@ -5,6 +5,7 @@ use App\Http\Controllers\SumaController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\CatchTheCharacterController;
+use App\Http\Controllers\MemoryGameController;
 
 Route::get('/', function () {
     return redirect()->route('games.index');
@@ -45,4 +46,17 @@ Route::prefix('catch-the-character')->name('catchTheCharacter.')->group(function
     Route::post('/api/click', [CatchTheCharacterController::class, 'processCharacterClick'])->name('processClick');
     Route::post('/api/missed', [CatchTheCharacterController::class, 'processMissedCharacter'])->name('processMissed');
     Route::post('/api/end', [CatchTheCharacterController::class, 'endGame'])->name('endGame');
+});
+
+// Rutas específicas de Memory Game
+Route::prefix('memory-game')->name('memoryGame.')->group(function () {
+    // Página del juego
+    Route::get('/{themeId}', [MemoryGameController::class, 'show'])->name('show');
+
+    // APIs del juego
+    Route::post('/api/{themeId}/pairs', [MemoryGameController::class, 'generatePairs'])->name('generatePairs');
+    Route::post('/api/match', [MemoryGameController::class, 'recordMatch'])->name('recordMatch');
+    Route::post('/api/mismatch', [MemoryGameController::class, 'recordMismatch'])->name('recordMismatch');
+    Route::post('/api/drawing', [MemoryGameController::class, 'recordDrawing'])->name('recordDrawing');
+    Route::post('/api/end', [MemoryGameController::class, 'endGame'])->name('endGame');
 });

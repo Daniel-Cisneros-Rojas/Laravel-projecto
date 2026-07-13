@@ -7,6 +7,7 @@ use App\Games\Repositories\CharacterRepository;
 use App\Games\Repositories\GameSessionRepository;
 use App\Games\Repositories\ThemeRepository;
 use App\Games\Services\CatchTheCharacterService;
+use App\Games\Services\MemoryGameService;
 use App\Games\Services\GameService;
 use App\Games\Services\LevelConfigService;
 use Illuminate\Support\ServiceProvider;
@@ -57,6 +58,16 @@ class GameServiceProvider extends ServiceProvider
                 gameService: $app->make(GameService::class),
                 levelConfigService: $app->make(LevelConfigService::class),
                 characterRepository: $app->make(CharacterRepository::class),
+            );
+        });
+
+        // Registrar servicio del juego de Memorama
+        $this->app->singleton(MemoryGameService::class, function ($app) {
+            return new MemoryGameService(
+                characterRepository: $app->make(CharacterRepository::class),
+                themeRepository: $app->make(ThemeRepository::class),
+                gameSessionRepository: $app->make(GameSessionRepository::class),
+                levelConfigService: $app->make(LevelConfigService::class),
             );
         });
     }
