@@ -42,6 +42,24 @@
             </a>
         </div>
     </div>
+
+    <!-- Stroke Order -->
+    <div class="game-card">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 3em; margin-bottom: 10px;">✍️</div>
+            <h2 style="color: var(--color-primary); margin-bottom: 10px;">Orden de Trazos</h2>
+            <p style="color: #666; margin-bottom: 15px;">Ordena los trazos de un carácter chino en el orden correcto</p>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <a href="{{ route('games.selectTheme', 'stroke-order') }}" class="btn btn-primary">
+                Jugar Ahora
+            </a>
+            <a href="{{ route('games.stats') }}" class="btn btn-secondary">
+                Ver Estadísticas
+            </a>
+        </div>
+    </div>
 </div>
 
 <div style="text-align: center; margin-top: 40px;">

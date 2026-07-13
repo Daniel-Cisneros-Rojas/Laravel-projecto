@@ -42,7 +42,7 @@
 </div>
 
 <!-- Memory Hanzi -->
-<div class="game-card">
+<div class="game-card" style="margin-bottom: 24px;">
     <h2 style="color: var(--color-primary); margin-bottom: 20px;">🎴 Memory Hanzi</h2>
 
     <div class="grid grid-2" style="margin-bottom: 20px;">
@@ -71,6 +71,41 @@
             <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Mejor Puntuación</div>
             <div style="font-size: 2em; font-weight: bold; color: var(--color-warning);">
                 {{ number_format($memoryGameStats['best_score'] ?? 0, 0) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stroke Order -->
+<div class="game-card" style="margin-bottom: 24px;">
+    <h2 style="color: var(--color-primary); margin-bottom: 20px;">✍️ Orden de Trazos</h2>
+
+    <div class="grid grid-2" style="margin-bottom: 20px;">
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Total de Partidas</div>
+            <div style="font-size: 2em; font-weight: bold; color: var(--color-primary);">
+                {{ $strokeOrderStats['total_sessions'] ?? 0 }}
+            </div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Puntuación Promedio</div>
+            <div style="font-size: 2em; font-weight: bold; color: var(--color-primary);">
+                {{ number_format($strokeOrderStats['average_score'] ?? 0, 0) }}
+            </div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Precisión Promedio</div>
+            <div style="font-size: 2em; font-weight: bold; color: var(--color-success);">
+                {{ number_format($strokeOrderStats['average_accuracy'] ?? 0, 1) }}%
+            </div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 20px; border-radius: 8px;">
+            <div style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Mejor Puntuación</div>
+            <div style="font-size: 2em; font-weight: bold; color: var(--color-warning);">
+                {{ number_format($strokeOrderStats['best_score'] ?? 0, 0) }}
             </div>
         </div>
     </div>

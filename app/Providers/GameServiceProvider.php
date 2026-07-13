@@ -8,6 +8,7 @@ use App\Games\Repositories\GameSessionRepository;
 use App\Games\Repositories\ThemeRepository;
 use App\Games\Services\CatchTheCharacterService;
 use App\Games\Services\MemoryGameService;
+use App\Games\Services\StrokeOrderService;
 use App\Games\Services\GameService;
 use App\Games\Services\LevelConfigService;
 use Illuminate\Support\ServiceProvider;
@@ -68,6 +69,14 @@ class GameServiceProvider extends ServiceProvider
                 themeRepository: $app->make(ThemeRepository::class),
                 gameSessionRepository: $app->make(GameSessionRepository::class),
                 levelConfigService: $app->make(LevelConfigService::class),
+            );
+        });
+
+        // Registrar servicio del juego de Orden de Trazos
+        $this->app->singleton(StrokeOrderService::class, function ($app) {
+            return new StrokeOrderService(
+                characterRepository: $app->make(CharacterRepository::class),
+                gameSessionRepository: $app->make(GameSessionRepository::class),
             );
         });
     }

@@ -53,10 +53,12 @@ class GameController extends Controller
     {
         $catchTheCharacterStats = $this->gameSessionRepository->getGameStats('catch_the_character');
         $memoryGameStats = $this->gameSessionRepository->getGameStats('memory_hanzi');
+        $strokeOrderStats = $this->gameSessionRepository->getGameStats('stroke_order');
 
         return view('games.stats', [
             'catchTheCharacterStats' => $catchTheCharacterStats,
             'memoryGameStats' => $memoryGameStats,
+            'strokeOrderStats' => $strokeOrderStats,
         ]);
     }
 

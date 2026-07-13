@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\CatchTheCharacterController;
 use App\Http\Controllers\MemoryGameController;
+use App\Http\Controllers\StrokeOrderController;
 
 Route::get('/', function () {
     return redirect()->route('games.index');
@@ -59,4 +60,15 @@ Route::prefix('memory-game')->name('memoryGame.')->group(function () {
     Route::post('/api/mismatch', [MemoryGameController::class, 'recordMismatch'])->name('recordMismatch');
     Route::post('/api/drawing', [MemoryGameController::class, 'recordDrawing'])->name('recordDrawing');
     Route::post('/api/end', [MemoryGameController::class, 'endGame'])->name('endGame');
+});
+
+// Rutas específicas de Stroke Order
+Route::prefix('stroke-order')->name('strokeOrder.')->group(function () {
+    // Página del juego
+    Route::get('/{themeId}', [StrokeOrderController::class, 'show'])->name('show');
+
+    // APIs del juego
+    Route::post('/api/{themeId}/character', [StrokeOrderController::class, 'getCharacter'])->name('getCharacter');
+    Route::post('/api/attempt', [StrokeOrderController::class, 'recordAttempt'])->name('recordAttempt');
+    Route::post('/api/end', [StrokeOrderController::class, 'endGame'])->name('endGame');
 });

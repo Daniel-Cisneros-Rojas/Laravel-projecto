@@ -25,6 +25,13 @@ return [
             'icon' => '🎴',
             'route' => 'memoryGame.show',
         ],
+        'stroke_order' => [
+            'name' => 'Orden de Trazos',
+            'slug' => 'stroke-order',
+            'description' => 'Ordena los trazos de un carácter en el orden correcto',
+            'icon' => '✍️',
+            'route' => 'strokeOrder.show',
+        ],
     ],
 
     'memory_game' => [
@@ -45,6 +52,13 @@ return [
         'match_score' => 50,
         'drawing_bonus_perfect' => 100,
         'drawing_bonus_good' => 50,
+    ],
+
+    'stroke_order' => [
+        'duration' => 120,
+        'correct_score' => 200,
+        'attempt_penalty' => 10,
+        'max_attempts' => 5,
     ],
 
     'levels' => [

@@ -849,12 +849,10 @@
             const hanzi = c1.type === 'character' ? c1.value : (c1.hanzi || c2.hanzi);
             if (hanzi) {
                 setTimeout(() => showDrawing(hanzi), 400);
+            } else if (state.matchesFound === CFG.pairsCount) {
+                setTimeout(endGame, 500);
             } else {
                 state.active = true;
-            }
-
-            if (state.matchesFound === CFG.pairsCount) {
-                setTimeout(endGame, 1500);
             }
         } else {
             soundWrong();
@@ -995,8 +993,12 @@
         state.drawingPhase = null;
         state.locked = false;
         if (!state.ended) {
-            state.active = true;
-            startTimer();
+            if (state.matchesFound === CFG.pairsCount) {
+                setTimeout(endGame, 500);
+            } else {
+                state.active = true;
+                startTimer();
+            }
         }
     }
 
