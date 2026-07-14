@@ -2,50 +2,82 @@
 
 @section('styles')
 <style>
+    :root {
+        --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+        --color-primary: #7c6ef0;
+        --color-primary-light: #a8a0f7;
+        --color-primary-dark: #6354d9;
+        --color-primary-50: #f0eefb;
+        --color-primary-100: #e3dffa;
+        --color-primary-200: #cdc6f5;
+        --color-secondary: #e8918f;
+        --color-secondary-50: #fdf2f2;
+        --color-secondary-dark: #d47573;
+        --color-accent: #6bc5a0;
+        --color-accent-50: #edf8f3;
+        --color-accent-dark: #4eaa84;
+        --color-warm: #e5a76e;
+        --color-warm-50: #fdf6ee;
+        --color-bg: #faf9fe;
+        --color-surface: #ffffff;
+        --color-text: #2d2a4a;
+        --color-text-muted: #7a7695;
+        --color-text-light: #a5a2b8;
+        --color-border: #e8e6f0;
+        --color-border-light: #f0eef5;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+        --shadow-sm: 0 1px 3px rgba(45,42,74,0.04), 0 1px 2px rgba(45,42,74,0.03);
+        --shadow-md: 0 4px 12px rgba(45,42,74,0.06), 0 2px 4px rgba(45,42,74,0.04);
+        --shadow-lg: 0 12px 32px rgba(45,42,74,0.08), 0 4px 8px rgba(45,42,74,0.04);
+        --shadow-xl: 0 20px 48px rgba(45,42,74,0.10), 0 8px 16px rgba(45,42,74,0.05);
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { overflow: hidden !important; }
     .container { max-width: none !important; padding: 0 !important; margin: 0 !important; height: 100vh !important; }
 
     .game-shell {
         display: flex; flex-direction: column; height: 100vh; width: 100vw; position: fixed; inset: 0;
-        background: linear-gradient(160deg, #0f0c29 0%, #1a1145 40%, #24243e 100%);
-        color: #e2e8f0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: var(--color-bg);
+        color: var(--color-text); font-family: var(--font-sans);
     }
 
     .hud {
         display: flex; align-items: center; justify-content: space-between; padding: 14px 24px;
-        background: rgba(255,255,255,0.04); backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; z-index: 10;
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-border-light); flex-shrink: 0; z-index: 10;
         gap: 12px; flex-wrap: wrap;
     }
     .hud-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .hud-brand h2 {
         font-size: 1.05rem; font-weight: 700; white-space: nowrap;
-        background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        color: var(--color-text); background: none; -webkit-text-fill-color: unset;
     }
     .hud-badge {
         font-size: 0.65rem; padding: 3px 8px; border-radius: 20px;
-        background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6);
+        background: var(--color-primary-50); color: var(--color-primary);
         font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; white-space: nowrap;
     }
     .hud-stats { display: flex; gap: 6px; flex-wrap: wrap; }
     .stat-chip {
         display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 10px;
-        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.06);
+        background: var(--color-bg); border: 1px solid var(--color-border-light);
         font-size: 0.8rem; white-space: nowrap; transition: background 0.2s;
     }
-    .stat-chip .icon { font-size: 0.9rem; opacity: 0.7; }
-    .stat-chip .label { color: rgba(255,255,255,0.5); font-size: 0.7rem; }
+    .stat-chip .icon { font-size: 0.9rem; opacity: 0.7; display: flex; align-items: center; }
+    .stat-chip .label { color: var(--color-text-muted); font-size: 0.7rem; }
     .stat-chip .value { font-weight: 700; font-size: 0.95rem; }
     .stat-chip.timer .value { font-variant-numeric: tabular-nums; }
-    .stat-chip.mistakes .value { color: #f87171; }
+    .stat-chip.mistakes .value { color: var(--color-secondary); }
 
     .exit-chip {
-        background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);
-        color: rgba(239, 68, 68, 0.7); text-decoration: none; cursor: pointer; transition: all 0.25s;
+        background: var(--color-secondary-50); border: 1px solid rgba(232,145,143,0.3);
+        color: var(--color-secondary); text-decoration: none; cursor: pointer; transition: all 0.25s;
     }
-    .exit-chip:hover { background: rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.4); color: #f87171; }
+    .exit-chip:hover { background: rgba(232,145,143,0.15); border-color: rgba(232,145,143,0.5); color: var(--color-secondary-dark); }
 
     .board {
         flex: 1; display: flex; flex-direction: row; align-items: stretch;
@@ -55,20 +87,20 @@
     .preview-panel {
         flex: 0 0 40%; max-width: 400px; min-width: 220px;
         display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
-        background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
-        border-radius: 20px; padding: 28px 20px;
+        background: var(--color-surface); border: 1px solid var(--color-border-light);
+        border-radius: var(--radius-xl); padding: 28px 20px; box-shadow: var(--shadow-sm);
     }
     .preview-panel .hanzi-label {
-        font-size: 0.7rem; color: rgba(255,255,255,0.35); text-transform: uppercase;
+        font-size: 0.7rem; color: var(--color-text-muted); text-transform: uppercase;
         letter-spacing: 0.1em; font-weight: 600;
     }
     .char-anim-wrap {
         width: 180px; height: 180px; position: relative;
-        border-radius: 16px; overflow: hidden;
-        background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+        border-radius: var(--radius-lg); overflow: hidden;
+        background: var(--color-bg); border: 1px solid var(--color-border-light);
     }
     .char-preview .pinyin {
-        font-size: 1.1rem; color: rgba(255,255,255,0.5);
+        font-size: 1.1rem; color: var(--color-text-muted);
     }
 
     .strokes-panel {
@@ -76,49 +108,49 @@
         display: flex; flex-direction: column; align-items: center; gap: 12px;
     }
     .strokes-label {
-        font-size: 0.8rem; color: rgba(255,255,255,0.4); text-transform: uppercase;
+        font-size: 0.8rem; color: var(--color-text-muted); text-transform: uppercase;
         letter-spacing: 0.08em; font-weight: 600;
     }
     .strokes-grid {
         display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
-        min-height: 120px; padding: 16px; border-radius: 16px;
-        background: rgba(255,255,255,0.03); border: 2px dashed rgba(255,255,255,0.08);
+        min-height: 120px; padding: 16px; border-radius: var(--radius-lg);
+        background: var(--color-surface); border: 2px dashed var(--color-border);
         transition: border-color 0.3s; flex: 1; align-content: flex-start;
     }
     .strokes-grid.drag-over { border-color: {{ $theme->color_primary }}; }
 
     .stroke-card {
-        width: 140px; height: 160px; border-radius: 14px; cursor: grab; user-select: none;
-        background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.1);
+        width: 160px; height: 180px; border-radius: 14px; cursor: grab; user-select: none;
+        background: var(--color-surface); border: 2px solid var(--color-border);
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         gap: 4px; transition: all 0.2s; position: relative; touch-action: none;
     }
     .stroke-card:active { cursor: grabbing; }
-    .stroke-card:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.09); transform: scale(1.05); }
+    .stroke-card:hover { border-color: var(--color-primary-100); background: var(--color-primary-50); transform: scale(1.05); }
     .stroke-card.dragging { opacity: 0.4; transform: scale(0.95); }
     .stroke-card.drag-target { border-color: {{ $theme->color_primary }}; background: rgba(139, 92, 246, 0.1); }
 
     .stroke-card .stroke-num {
         position: absolute; top: 6px; left: 8px; font-size: 0.7rem; font-weight: 700;
-        color: rgba(255,255,255,0.3);
+        color: var(--color-text-light);
     }
-    .stroke-card svg { width: 110px; height: 110px; transform: scaleY(-1); }
-    .stroke-card svg .stroke-outline { fill: none; stroke: rgba(255,255,255,0.45); stroke-width: 80; stroke-linecap: round; stroke-linejoin: round; }
-    .stroke-card svg .stroke-prev { fill: none; stroke: rgba(255,255,255,0.8); stroke-width: 80; stroke-linecap: round; stroke-linejoin: round; }
-    .stroke-card svg .stroke-current { fill: none; stroke: #fff; stroke-width: 80; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px rgba(255,255,255,0.4)); }
+    .stroke-card svg { width: 130px; height: 130px; transform: scaleY(-1); }
+    .stroke-card svg .stroke-outline { fill: none; stroke: var(--color-text-light); stroke-width: 80; stroke-linecap: round; stroke-linejoin: round; }
+    .stroke-card svg .stroke-prev { fill: none; stroke: var(--color-text); stroke-width: 80; stroke-linecap: round; stroke-linejoin: round; opacity: 0.8; }
+    .stroke-card svg .stroke-current { fill: none; stroke: var(--color-primary); stroke-width: 80; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px rgba(124,110,240,0.3)); }
 
-    .stroke-card.correct { border-color: #34d399; background: rgba(52,211,153,0.12); }
-    .stroke-card.wrong { border-color: #f87171; background: rgba(248,113,113,0.12); animation: shake 0.4s ease; }
+    .stroke-card.correct { border-color: var(--color-accent); background: var(--color-accent-50); }
+    .stroke-card.wrong { border-color: var(--color-secondary); background: var(--color-secondary-50); animation: shake 0.4s ease; }
 
-    .stroke-card.pos-correct { border-color: #34d399; background: rgba(52,211,153,0.08); }
-    .stroke-card.pos-wrong { border-color: #f87171; background: rgba(248,113,113,0.08); }
+    .stroke-card.pos-correct { border-color: var(--color-accent); background: rgba(107,197,160,0.08); }
+    .stroke-card.pos-wrong { border-color: var(--color-secondary); background: rgba(232,145,143,0.08); }
 
     .stroke-card.locked {
-        border-color: #34d399; background: rgba(52,211,153,0.1);
+        border-color: var(--color-accent); background: var(--color-accent-50);
         cursor: default; pointer-events: none;
     }
-    .stroke-card.locked::after {
-        content: '🔒'; position: absolute; top: 4px; right: 6px; font-size: 0.65rem;
+    .stroke-card.locked .lock-icon {
+        display: block; position: absolute; top: 4px; right: 6px; color: var(--color-accent); width: 14px; height: 14px;
     }
 
     .actions { display: flex; gap: 12px; justify-content: center; margin-top: auto; padding-top: 8px; }
@@ -127,81 +159,85 @@
         font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.25s;
     }
     .btn-check {
-        background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
-        color: #fff;
+        background: var(--color-primary); color: #fff;
+        box-shadow: 0 2px 8px rgba(124,110,240,0.25);
     }
-    .btn-check:hover { box-shadow: 0 4px 16px {{ $theme->color_primary }}66; transform: translateY(-1px); }
+    .btn-check:hover { box-shadow: 0 4px 16px rgba(124,110,240,0.35); transform: translateY(-1px); }
     .btn-check:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
     .btn-skip {
-        background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.6);
+        background: var(--color-bg); color: var(--color-text-muted);
+        border: 1px solid var(--color-border);
     }
-    .btn-skip:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .btn-skip:hover { background: var(--color-primary-50); color: var(--color-primary); }
 
     .footer-bar {
-        flex-shrink: 0; padding: 10px 24px; background: rgba(255,255,255,0.03);
-        border-top: 1px solid rgba(255,255,255,0.06);
+        flex-shrink: 0; padding: 10px 24px; background: var(--color-surface);
+        border-top: 1px solid var(--color-border-light);
         display: flex; flex-direction: column; gap: 6px; align-items: center;
     }
-    .timer-track { width: 100%; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.06); overflow: hidden; }
+    .timer-track { width: 100%; height: 4px; border-radius: 2px; background: var(--color-border-light); overflow: hidden; }
     .timer-fill {
         height: 100%; border-radius: 2px;
         background: linear-gradient(90deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
         transition: width 1s linear;
     }
     .timer-fill.warning { background: linear-gradient(90deg, #f59e0b, #ef4444); }
-    .footer-hint { font-size: 0.72rem; color: rgba(255,255,255,0.35); }
+    .footer-hint { font-size: 0.72rem; color: var(--color-text-muted); }
 
     .overlay {
-        display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
-        backdrop-filter: blur(6px); z-index: 500; align-items: center; justify-content: center;
+        display: none; position: fixed; inset: 0;
+        background: rgba(45, 42, 74, 0.4); backdrop-filter: blur(8px);
+        z-index: 500; align-items: center; justify-content: center;
     }
     .overlay.visible { display: flex; }
 
     .modal {
-        background: #1e1b3a; border: 1px solid rgba(255,255,255,0.1);
+        background: var(--color-surface); border: 1px solid var(--color-border-light);
         border-radius: 24px; padding: 40px; text-align: center; width: min(480px, 90vw);
+        box-shadow: var(--shadow-xl);
         animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .modal h2 {
         font-size: 1.6rem; font-weight: 800; margin-bottom: 4px;
-        background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
-        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        color: var(--color-text); background: none; -webkit-text-fill-color: unset;
     }
-    .modal .subtitle { color: rgba(255,255,255,0.4); font-size: 0.85rem; margin-bottom: 28px; }
+    .modal .subtitle { color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 28px; }
     .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
     .result-item {
-        background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+        background: var(--color-bg); border: 1px solid var(--color-border-light);
         border-radius: 14px; padding: 16px 12px;
     }
     .result-item .r-label {
-        font-size: 0.7rem; color: rgba(255,255,255,0.4); text-transform: uppercase;
+        font-size: 0.7rem; color: var(--color-text-muted); text-transform: uppercase;
         letter-spacing: 0.06em; margin-bottom: 6px;
     }
-    .result-item .r-value { font-size: 1.6rem; font-weight: 800; color: #fff; }
-    .result-item .r-value.accent { color: {{ $theme->color_primary }}; }
+    .result-item .r-value { font-size: 1.6rem; font-weight: 800; color: var(--color-text); }
+    .result-item .r-value.accent { color: var(--color-primary); }
     .modal-actions { display: flex; flex-direction: column; gap: 10px; }
     .modal-actions button, .modal-actions a {
         padding: 12px; border-radius: 12px; font-weight: 700; font-size: 0.9rem;
         cursor: pointer; border: none; transition: all 0.25s; text-decoration: none;
-        text-align: center; display: block;
+        text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px;
     }
     .modal-actions .btn-main {
-        background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
-        color: #fff;
+        background: var(--color-primary); color: #fff;
     }
-    .modal-actions .btn-main:hover { box-shadow: 0 6px 20px {{ $theme->color_primary }}55; transform: translateY(-2px); }
-    .modal-actions .btn-ghost { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); }
-    .modal-actions .btn-ghost:hover { background: rgba(255,255,255,0.10); color: #fff; }
+    .modal-actions .btn-main:hover { box-shadow: 0 6px 20px rgba(124,110,240,0.35); transform: translateY(-2px); }
+    .modal-actions .btn-ghost {
+        background: var(--color-bg); color: var(--color-text-muted);
+        border: 1px solid var(--color-border);
+    }
+    .modal-actions .btn-ghost:hover { background: var(--color-primary-50); color: var(--color-primary); }
 
-    .loading-msg { color: rgba(255,255,255,0.4); font-size: 0.9rem; padding: 40px; text-align: center; width: 100%; align-self: center; }
+    .loading-msg { color: var(--color-text-muted); font-size: 0.9rem; padding: 40px; text-align: center; width: 100%; align-self: center; }
 
     .particle {
         position: fixed; width: 6px; height: 6px; border-radius: 50%;
         pointer-events: none; z-index: 100; opacity: 1;
         animation: particleFly 0.7s ease-out forwards;
     }
-    .particle.hit { background: #34d399; box-shadow: 0 0 6px #34d399; }
-    .particle.miss { background: #f87171; box-shadow: 0 0 6px #f87171; }
+    .particle.hit { background: var(--color-accent); box-shadow: 0 0 6px var(--color-accent); }
+    .particle.miss { background: var(--color-secondary); box-shadow: 0 0 6px var(--color-secondary); }
 
     @keyframes particleFly {
         0% { transform: translate(0,0) scale(1); opacity: 1; }
@@ -219,9 +255,9 @@
         80% { transform: translateX(4px); }
     }
     @keyframes successPulse {
-        0% { box-shadow: 0 0 0 0 rgba(52,211,153,0.5); }
-        70% { box-shadow: 0 0 0 12px rgba(52,211,153,0); }
-        100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+        0% { box-shadow: 0 0 0 0 rgba(107,197,160,0.5); }
+        70% { box-shadow: 0 0 0 12px rgba(107,197,160,0); }
+        100% { box-shadow: 0 0 0 0 rgba(107,197,160,0); }
     }
 
     @media (max-width: 700px) {
@@ -246,24 +282,24 @@
         </div>
         <div class="hud-stats">
             <div class="stat-chip">
-                <span class="icon">⭐</span>
+                <span class="icon"><i data-lucide="star" style="width:14px;height:14px;"></i></span>
                 <span class="value" id="score">0</span>
             </div>
             <div class="stat-chip">
-                <span class="icon">✅</span>
+                <span class="icon"><i data-lucide="check" style="width:14px;height:14px;"></i></span>
                 <span class="label">Acertados</span>
                 <span class="value" id="hits">0</span>
             </div>
             <div class="stat-chip mistakes">
-                <span class="icon">✕</span>
+                <span class="icon"><i data-lucide="x" style="width:14px;height:14px;"></i></span>
                 <span class="value" id="mistakes">0</span>
             </div>
             <div class="stat-chip timer">
-                <span class="icon">⏱</span>
+                <span class="icon"><i data-lucide="clock" style="width:14px;height:14px;"></i></span>
                 <span class="value" id="timer">{{ $gameData['duration'] }}s</span>
             </div>
             <a href="{{ route('games.selectTheme', 'stroke-order') }}" class="stat-chip exit-chip" onclick="return confirm('¿Seguro que quieres salir? Perderás el progreso.')">
-                <span class="icon">✕</span>
+                <span class="icon"><i data-lucide="log-out" style="width:14px;height:14px;"></i></span>
                 <span class="label">Salir</span>
             </a>
         </div>
@@ -322,9 +358,9 @@
             </div>
         </div>
         <div class="modal-actions">
-            <button class="btn-main" onclick="restartGame()">Jugar de Nuevo</button>
-            <a class="btn-ghost" href="{{ route('games.selectTheme', 'stroke-order') }}">Cambiar Tema</a>
-            <a class="btn-ghost" href="{{ route('games.index') }}">Menú Principal</a>
+            <button class="btn-main" onclick="restartGame()"><i data-lucide="rotate-ccw" style="width:16px;height:16px;"></i> Jugar de Nuevo</button>
+            <a class="btn-ghost" href="{{ route('games.selectTheme', 'stroke-order') }}"><i data-lucide="palette" style="width:16px;height:16px;"></i> Cambiar Tema</a>
+            <a class="btn-ghost" href="{{ route('games.index') }}"><i data-lucide="home" style="width:16px;height:16px;"></i> Menú Principal</a>
         </div>
     </div>
 </div>
@@ -461,8 +497,14 @@
             svg.appendChild(p);
         }
 
+        const lockIcon = document.createElement('i');
+        lockIcon.setAttribute('data-lucide', 'lock');
+        lockIcon.className = 'lock-icon';
+        lockIcon.style.display = 'none';
+
         card.appendChild(num);
         card.appendChild(svg);
+        card.appendChild(lockIcon);
 
         card.addEventListener('dragstart', onDragStart);
         card.addEventListener('dragend', onDragEnd);
@@ -601,35 +643,64 @@
             state.character = data.character;
             dom.currentPinyin.textContent = data.character.pinyin;
 
+            const hanziStr = data.character.hanzi;
+            const chars = [...hanziStr].filter(c => c.trim());
+
+            async function fetchCharData(singleChar) {
+                try {
+                    return await new Promise((resolve, reject) => {
+                        const timeout = setTimeout(() => reject(new Error('Timeout')), 10000);
+                        HanziWriter.loadCharacterData(singleChar).then(d => {
+                            clearTimeout(timeout);
+                            resolve(d);
+                        }).catch(reject);
+                    });
+                } catch (_) {
+                    const res = await fetch('https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/' + encodeURIComponent(singleChar) + '.json');
+                    if (!res.ok) throw new Error('No stroke data for ' + singleChar);
+                    return await res.json();
+                }
+            }
+
             let charData;
-            try {
-                charData = await new Promise((resolve, reject) => {
-                    const timeout = setTimeout(() => reject(new Error('Timeout')), 10000);
-                    HanziWriter.loadCharacterData(data.character.hanzi).then(d => {
-                        clearTimeout(timeout);
-                        resolve(d);
-                    }).catch(reject);
-                });
-            } catch (_) {
-                const res = await fetch('https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/' + encodeURIComponent(data.character.hanzi) + '.json');
-                if (!res.ok) throw new Error('No stroke data');
-                charData = await res.json();
+            if (chars.length === 1) {
+                charData = await fetchCharData(chars[0]);
+            } else {
+                const allData = await Promise.all(chars.map(c => fetchCharData(c)));
+                const mergedStrokes = [];
+                const mergedMedians = [];
+                let totalWidth = 0;
+                for (const d of allData) {
+                    const offset = totalWidth;
+                    mergedStrokes.push(...d.strokes);
+                    mergedMedians.push(...d.medians.map(medians =>
+                        medians.map(([x, y]) => [x + offset, y])
+                    ));
+                    totalWidth += d.width;
+                }
+                charData = {
+                    strokes: mergedStrokes,
+                    medians: mergedMedians,
+                    width: totalWidth,
+                };
             }
 
             state.strokeCount = charData.strokes.length;
             state.correctOrder = charData.strokes.map((_, i) => i);
 
             renderStrokes(charData);
+            if (typeof lucide !== 'undefined') lucide.createIcons();
 
             if (state.animTimerRef) { clearInterval(state.animTimerRef); state.animTimerRef = null; }
             try { HanziWriter.remove && HanziWriter.remove('charAnimWrap'); } catch (_) {}
             const wrap = dom.charPreview.querySelector('#charAnimWrap');
             if (wrap) wrap.innerHTML = '';
 
-            state.previewWriter = HanziWriter.create('charAnimWrap', data.character.hanzi, {
+            const firstChar = chars[0];
+            state.previewWriter = HanziWriter.create('charAnimWrap', firstChar, {
                 width: 180, height: 180, padding: 10,
                 showOutline: true, showCharacter: true,
-                strokeColor: '#fff', outlineColor: 'rgba(255,255,255,0.15)',
+                strokeColor: '#7c6ef0', outlineColor: 'rgba(124,110,240,0.15)',
                 strokeAnimationSpeed: 1.2, delayBetweenStrokes: 200,
             });
             setTimeout(() => {
@@ -767,9 +838,13 @@
             setTimeout(() => {
                 visual.forEach((card, i) => {
                     card.classList.remove('wrong', 'correct');
+                    const lockIcon = card.querySelector('.lock-icon');
                     if (userOrder[i] === state.correctOrder[i]) {
                         card.classList.add('locked');
                         card.draggable = false;
+                        if (lockIcon) lockIcon.style.display = 'block';
+                    } else {
+                        if (lockIcon) lockIcon.style.display = 'none';
                     }
                 });
                 showPositionFeedback();

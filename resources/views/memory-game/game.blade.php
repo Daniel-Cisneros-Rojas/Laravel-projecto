@@ -2,6 +2,42 @@
 
 @section('styles')
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    :root {
+        --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+        --color-primary: #7c6ef0;
+        --color-primary-light: #a8a0f7;
+        --color-primary-dark: #6354d9;
+        --color-primary-50: #f0eefb;
+        --color-primary-100: #e3dffa;
+        --color-primary-200: #cdc6f5;
+        --color-secondary: #e8918f;
+        --color-secondary-50: #fdf2f2;
+        --color-accent: #6bc5a0;
+        --color-accent-50: #edf8f3;
+        --color-accent-dark: #4eaa84;
+        --color-warm: #e5a76e;
+        --color-warm-50: #fdf6ee;
+        --color-bg: #faf9fe;
+        --color-surface: #ffffff;
+        --color-text: #2d2a4a;
+        --color-text-muted: #7a7695;
+        --color-text-light: #a5a2b8;
+        --color-border: #e8e6f0;
+        --color-border-light: #f0eef5;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+        --shadow-sm: 0 1px 3px rgba(45,42,74,0.04), 0 1px 2px rgba(45,42,74,0.03);
+        --shadow-md: 0 4px 12px rgba(45,42,74,0.06), 0 2px 4px rgba(45,42,74,0.04);
+        --shadow-lg: 0 12px 32px rgba(45,42,74,0.08), 0 4px 8px rgba(45,42,74,0.04);
+        --shadow-xl: 0 20px 48px rgba(45,42,74,0.10), 0 8px 16px rgba(45,42,74,0.05);
+        --transition-fast: 0.15s ease;
+        --transition-base: 0.25s ease;
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body { overflow: hidden !important; }
@@ -16,9 +52,9 @@
         width: 100vw;
         position: fixed;
         inset: 0;
-        background: linear-gradient(160deg, #0f0c29 0%, #1a1145 40%, #24243e 100%);
-        color: #e2e8f0;
-        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: var(--color-bg);
+        color: var(--color-text);
+        font-family: var(--font-sans);
     }
 
     /* ── Header / HUD ─────────────────────────────── */
@@ -27,9 +63,8 @@
         align-items: center;
         justify-content: space-between;
         padding: 14px 24px;
-        background: rgba(255,255,255,0.04);
-        backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(255,255,255,0.06);
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-border-light);
         flex-shrink: 0;
         z-index: 10;
         gap: 12px;
@@ -47,18 +82,15 @@
         font-size: 1.05rem;
         font-weight: 700;
         white-space: nowrap;
-        background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: var(--color-text);
     }
 
     .hud-badge {
         font-size: 0.65rem;
         padding: 3px 8px;
         border-radius: 20px;
-        background: rgba(255,255,255,0.08);
-        color: rgba(255,255,255,0.6);
+        background: var(--color-primary-50);
+        color: var(--color-primary);
         font-weight: 600;
         letter-spacing: 0.03em;
         text-transform: uppercase;
@@ -77,32 +109,33 @@
         gap: 6px;
         padding: 6px 14px;
         border-radius: 10px;
-        background: rgba(255,255,255,0.06);
-        border: 1px solid rgba(255,255,255,0.06);
+        background: var(--color-bg);
+        border: 1px solid var(--color-border-light);
         font-size: 0.8rem;
         white-space: nowrap;
+        color: var(--color-text);
         transition: background 0.2s;
     }
 
     .stat-chip .icon { font-size: 0.9rem; opacity: 0.7; }
-    .stat-chip .label { color: rgba(255,255,255,0.5); font-size: 0.7rem; }
+    .stat-chip .label { color: var(--color-text-muted); font-size: 0.7rem; }
     .stat-chip .value { font-weight: 700; font-size: 0.95rem; }
     .stat-chip.timer .value { font-variant-numeric: tabular-nums; }
-    .stat-chip.mistakes .value { color: #f87171; }
+    .stat-chip.mistakes .value { color: var(--color-secondary); }
 
     .exit-chip {
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid rgba(239, 68, 68, 0.2);
-        color: rgba(239, 68, 68, 0.7);
+        background: var(--color-secondary-50);
+        border: 1px solid rgba(232,145,143,0.3);
+        color: var(--color-secondary);
         text-decoration: none;
         cursor: pointer;
         transition: all 0.25s;
     }
 
     .exit-chip:hover {
-        background: rgba(239, 68, 68, 0.2);
-        border-color: rgba(239, 68, 68, 0.4);
-        color: #f87171;
+        background: rgba(232,145,143,0.15);
+        border-color: rgba(232,145,143,0.4);
+        color: var(--color-secondary-dark, #d47270);
     }
 
     /* ── Mode selector ────────────────────────────── */
@@ -112,17 +145,17 @@
         justify-content: center;
         gap: 8px;
         padding: 10px 24px;
-        background: rgba(255,255,255,0.02);
-        border-bottom: 1px solid rgba(255,255,255,0.04);
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-border-light);
         flex-shrink: 0;
     }
 
     .mode-btn {
         padding: 6px 18px;
         border-radius: 8px;
-        border: 1px solid rgba(255,255,255,0.1);
-        background: transparent;
-        color: rgba(255,255,255,0.5);
+        border: 1px solid var(--color-border);
+        background: var(--color-surface);
+        color: var(--color-text-muted);
         font-size: 0.8rem;
         font-weight: 600;
         cursor: pointer;
@@ -130,15 +163,15 @@
     }
 
     .mode-btn:hover {
-        background: rgba(255,255,255,0.06);
-        color: rgba(255,255,255,0.8);
+        background: var(--color-primary-50);
+        color: var(--color-primary);
     }
 
     .mode-btn.active {
-        background: linear-gradient(135deg, {{ $theme->color_primary }}cc, {{ $theme->color_secondary }}cc);
+        background: var(--color-primary);
         color: #fff;
         border-color: transparent;
-        box-shadow: 0 2px 12px {{ $theme->color_primary }}44;
+        box-shadow: 0 2px 12px rgba(124,110,240,0.25);
     }
 
     /* ── Board ────────────────────────────────────── */
@@ -192,21 +225,21 @@
 
     /* Front */
     .card-front {
-        background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
-        border: 1px solid rgba(255,255,255,0.08);
-        backdrop-filter: blur(6px);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border-light);
+        box-shadow: var(--shadow-sm);
     }
 
     .card-front::before {
         content: '?';
         font-size: 2rem;
         font-weight: 800;
-        color: rgba(255,255,255,0.12);
+        color: var(--color-text-light);
     }
 
     .card:hover .card-front {
-        background: linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
-        border-color: rgba(255,255,255,0.14);
+        background: var(--color-primary-50);
+        border-color: var(--color-primary-100);
         transform: scale(1.03);
     }
 
@@ -227,8 +260,8 @@
 
     .card-back.type-pinyin,
     .card-back.type-meaning {
-        background: linear-gradient(145deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
-        border-color: rgba(255,255,255,0.15);
+        background: var(--color-bg);
+        border: 1px solid var(--color-border);
     }
 
     .card-back .card-value {
@@ -245,25 +278,25 @@
 
     .card-back.type-pinyin .card-value {
         font-size: 1rem;
-        color: rgba(255,255,255,0.85);
+        color: var(--color-text);
     }
 
     .card-back.type-meaning .card-value {
         font-size: 0.85rem;
-        color: rgba(255,255,255,0.85);
+        color: var(--color-text);
     }
 
     .card-back .card-sub {
         font-size: 0.65rem;
-        color: rgba(255,255,255,0.45);
+        color: var(--color-text-muted);
         margin-top: 4px;
     }
 
     /* Matched state */
     .card.matched .card-inner { transform: rotateY(180deg); }
     .card.matched .card-back {
-        border-color: #34d399;
-        box-shadow: 0 0 20px rgba(52,211,153,0.25), inset 0 0 20px rgba(52,211,153,0.1);
+        border-color: var(--color-accent);
+        box-shadow: 0 0 20px rgba(107,197,160,0.25), inset 0 0 20px rgba(107,197,160,0.1);
     }
 
     .card.matched::after {
@@ -271,7 +304,7 @@
         position: absolute;
         inset: -2px;
         border-radius: 16px;
-        border: 2px solid #34d399;
+        border: 2px solid var(--color-accent);
         animation: matchPulse 1.5s ease-in-out infinite;
         pointer-events: none;
         z-index: 2;
@@ -279,7 +312,7 @@
 
     /* Wrong flash */
     .card.wrong .card-inner { animation: shake 0.4s ease; }
-    .card.wrong .card-back { border-color: #f87171; }
+    .card.wrong .card-back { border-color: var(--color-secondary); }
 
     @keyframes matchPulse {
         0%, 100% { opacity: 0.4; transform: scale(1); }
@@ -298,8 +331,8 @@
     .footer-bar {
         flex-shrink: 0;
         padding: 10px 24px;
-        background: rgba(255,255,255,0.03);
-        border-top: 1px solid rgba(255,255,255,0.06);
+        background: var(--color-surface);
+        border-top: 1px solid var(--color-border-light);
         display: flex;
         flex-direction: column;
         gap: 6px;
@@ -310,7 +343,7 @@
         width: 100%;
         height: 4px;
         border-radius: 2px;
-        background: rgba(255,255,255,0.06);
+        background: var(--color-border-light);
         overflow: hidden;
     }
 
@@ -325,7 +358,7 @@
 
     .footer-hint {
         font-size: 0.72rem;
-        color: rgba(255,255,255,0.35);
+        color: var(--color-text-muted);
     }
 
     /* ── Overlays shared ──────────────────────────── */
@@ -333,8 +366,8 @@
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(0,0,0,0.75);
-        backdrop-filter: blur(6px);
+        background: rgba(45, 42, 74, 0.4);
+        backdrop-filter: blur(8px);
         z-index: 500;
         align-items: center;
         justify-content: center;
@@ -344,33 +377,34 @@
 
     /* ── Drawing overlay ──────────────────────────── */
     .drawing-card {
-        background: #1e1b3a;
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 20px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border-light);
+        border-radius: var(--radius-xl);
         padding: 32px;
         text-align: center;
         width: min(400px, 90vw);
+        box-shadow: var(--shadow-xl);
         animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .drawing-card h3 {
         font-size: 1.25rem;
         font-weight: 700;
-        color: #fff;
+        color: var(--color-text);
         margin-bottom: 6px;
     }
 
     .drawing-card .sub {
         font-size: 0.82rem;
-        color: rgba(255,255,255,0.45);
+        color: var(--color-text-muted);
         margin-bottom: 20px;
     }
 
     #character-target-div {
         margin: 0 auto 20px;
-        background: rgba(255,255,255,0.04);
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.06);
+        background: var(--color-bg);
+        border-radius: var(--radius-md);
+        border: 1px solid var(--color-border-light);
     }
 
     .drawing-actions {
@@ -381,7 +415,7 @@
 
     .drawing-actions button {
         padding: 10px 24px;
-        border-radius: 10px;
+        border-radius: var(--radius-sm);
         border: none;
         font-weight: 600;
         font-size: 0.85rem;
@@ -390,27 +424,29 @@
     }
 
     .btn-skip {
-        background: rgba(255,255,255,0.08);
-        color: rgba(255,255,255,0.6);
+        background: var(--color-bg);
+        color: var(--color-text-muted);
+        border: 1px solid var(--color-border);
     }
 
-    .btn-skip:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .btn-skip:hover { background: var(--color-primary-50); color: var(--color-primary); }
 
     .btn-confirm {
-        background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
+        background: var(--color-primary);
         color: #fff;
     }
 
-    .btn-confirm:hover { box-shadow: 0 4px 16px {{ $theme->color_primary }}66; transform: translateY(-1px); }
+    .btn-confirm:hover { box-shadow: 0 4px 16px rgba(124,110,240,0.35); transform: translateY(-1px); }
 
     /* ── Game Over modal ──────────────────────────── */
     .modal {
-        background: #1e1b3a;
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 24px;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border-light);
+        border-radius: var(--radius-xl);
         padding: 40px;
         text-align: center;
         width: min(480px, 90vw);
+        box-shadow: var(--shadow-xl);
         animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
@@ -418,14 +454,11 @@
         font-size: 1.6rem;
         font-weight: 800;
         margin-bottom: 4px;
-        background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: var(--color-text);
     }
 
     .modal .subtitle {
-        color: rgba(255,255,255,0.4);
+        color: var(--color-text-muted);
         font-size: 0.85rem;
         margin-bottom: 28px;
     }
@@ -438,15 +471,15 @@
     }
 
     .result-item {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.06);
+        background: var(--color-bg);
+        border: 1px solid var(--color-border-light);
         border-radius: 14px;
         padding: 16px 12px;
     }
 
     .result-item .r-label {
         font-size: 0.7rem;
-        color: rgba(255,255,255,0.4);
+        color: var(--color-text-muted);
         text-transform: uppercase;
         letter-spacing: 0.06em;
         margin-bottom: 6px;
@@ -455,10 +488,10 @@
     .result-item .r-value {
         font-size: 1.6rem;
         font-weight: 800;
-        color: #fff;
+        color: var(--color-text);
     }
 
-    .result-item .r-value.accent { color: {{ $theme->color_primary }}; }
+    .result-item .r-value.accent { color: var(--color-primary); }
 
     .modal-actions {
         display: flex;
@@ -469,7 +502,7 @@
     .modal-actions button,
     .modal-actions a {
         padding: 12px;
-        border-radius: 12px;
+        border-radius: var(--radius-md);
         font-weight: 700;
         font-size: 0.9rem;
         cursor: pointer;
@@ -481,18 +514,19 @@
     }
 
     .modal-actions .btn-main {
-        background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
+        background: var(--color-primary);
         color: #fff;
     }
 
-    .modal-actions .btn-main:hover { box-shadow: 0 6px 20px {{ $theme->color_primary }}55; transform: translateY(-2px); }
+    .modal-actions .btn-main:hover { box-shadow: 0 6px 20px rgba(124,110,240,0.3); transform: translateY(-2px); }
 
     .modal-actions .btn-ghost {
-        background: rgba(255,255,255,0.06);
-        color: rgba(255,255,255,0.6);
+        background: var(--color-bg);
+        color: var(--color-text-muted);
+        border: 1px solid var(--color-border);
     }
 
-    .modal-actions .btn-ghost:hover { background: rgba(255,255,255,0.10); color: #fff; }
+    .modal-actions .btn-ghost:hover { background: var(--color-primary-50); color: var(--color-primary); }
 
     /* ── Particles ────────────────────────────────── */
     .particle {
@@ -506,8 +540,8 @@
         animation: particleFly 0.7s ease-out forwards;
     }
 
-    .particle.hit { background: #34d399; box-shadow: 0 0 6px #34d399; }
-    .particle.miss { background: #f87171; box-shadow: 0 0 6px #f87171; }
+    .particle.hit { background: var(--color-accent); box-shadow: 0 0 6px var(--color-accent); }
+    .particle.miss { background: var(--color-secondary); box-shadow: 0 0 6px var(--color-secondary); }
 
     @keyframes particleFly {
         0% { transform: translate(0,0) scale(1); opacity: 1; }
@@ -551,24 +585,24 @@
 
         <div class="hud-stats">
             <div class="stat-chip">
-                <span class="icon">⭐</span>
+                <span class="icon"><i data-lucide="star" style="width:14px;height:14px;"></i></span>
                 <span class="value" id="score">0</span>
             </div>
             <div class="stat-chip">
-                <span class="icon">🃏</span>
+                <span class="icon"><i data-lucide="layers" style="width:14px;height:14px;"></i></span>
                 <span class="label">Parejas</span>
                 <span class="value" id="matches">0/{{ $gameData['pairs_count'] }}</span>
             </div>
             <div class="stat-chip mistakes">
-                <span class="icon">✕</span>
+                <span class="icon"><i data-lucide="x" style="width:14px;height:14px;"></i></span>
                 <span class="value" id="mistakes">0</span>
             </div>
             <div class="stat-chip timer">
-                <span class="icon">⏱</span>
+                <span class="icon"><i data-lucide="clock" style="width:14px;height:14px;"></i></span>
                 <span class="value" id="timer">{{ $gameData['duration'] }}s</span>
             </div>
             <a href="{{ route('games.selectTheme', 'memory-game') }}" class="stat-chip exit-chip" onclick="return confirm('¿Seguro que quieres salir? Perderás el progreso.')">
-                <span class="icon">✕</span>
+                <span class="icon"><i data-lucide="log-out" style="width:14px;height:14px;"></i></span>
                 <span class="label">Salir</span>
             </a>
         </div>
@@ -603,7 +637,7 @@
 <!-- Drawing Overlay -->
 <div class="overlay" id="drawingOverlay">
     <div class="drawing-card">
-        <h3 id="drawingLabel">✍ Observa cómo se dibuja</h3>
+        <h3 id="drawingLabel"><i data-lucide="pen-tool" style="width:18px;height:18px;vertical-align:-3px;"></i> Observa como se dibuja</h3>
         <p class="sub" id="drawingSub">Memoriza el orden de los trazos</p>
         <div id="character-target-div" style="width:200px;height:200px;"></div>
         <div class="drawing-actions" id="drawingActions" style="display:none;">
@@ -639,9 +673,9 @@
         </div>
 
         <div class="modal-actions">
-            <button class="btn-main" onclick="restartSameMode()">Jugar de Nuevo</button>
-            <a class="btn-ghost" href="{{ route('games.selectTheme', 'memory-game') }}">Cambiar Tema</a>
-            <a class="btn-ghost" href="{{ route('games.index') }}">Menú Principal</a>
+            <button class="btn-main" onclick="restartSameMode()"><i data-lucide="rotate-ccw" style="width:16px;height:16px;"></i> Jugar de Nuevo</button>
+            <a class="btn-ghost" href="{{ route('games.selectTheme', 'memory-game') }}"><i data-lucide="palette" style="width:16px;height:16px;"></i> Cambiar Tema</a>
+            <a class="btn-ghost" href="{{ route('games.index') }}"><i data-lucide="home" style="width:16px;height:16px;"></i> Menu Principal</a>
         </div>
     </div>
 </div>
@@ -904,12 +938,12 @@
                     padding: 5,
                     showCharacter: false,
                     showOutline: true,
-                    outlineColor: 'rgba(255, 255, 255, 0.2)',
-                    drawingColor: '#ffffff',
+                    outlineColor: 'rgba(124,110,240,0.15)',
+                    drawingColor: '#7c6ef0',
                     highlightColor: '#34d399',
                     strokeAnimationSpeed: 1.5,
                     delayBetweenStrokes: 200,
-                    strokeColor: 'rgba(255, 255, 255, 0.85)',
+                    strokeColor: '#7c6ef0',
                 });
 
                 state.writer.animateCharacter({
@@ -942,12 +976,12 @@
 
         switch (state.drawingPhase) {
             case 'animating':
-                label.textContent = '✍ Observa cómo se dibuja';
+                label.innerHTML = '<i data-lucide="pen-tool" style="width:18px;height:18px;vertical-align:-3px;"></i> Observa como se dibuja';
                 sub.textContent = 'Memoriza el orden de los trazos';
                 actions.style.display = 'none';
                 break;
             case 'quiz':
-                label.textContent = '✍ Dibuja el carácter';
+                label.innerHTML = '<i data-lucide="pen-tool" style="width:18px;height:18px;vertical-align:-3px;"></i> Dibuja el caracter';
                 sub.textContent = 'Traza los trazos en orden correcto';
                 actions.style.display = 'flex';
                 break;
@@ -957,6 +991,7 @@
                 actions.style.display = 'flex';
                 break;
         }
+        if (typeof lucide !== 'undefined') lucide.createIcons();
     }
 
     window.confirmDrawing = async function () {

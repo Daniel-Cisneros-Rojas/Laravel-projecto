@@ -3,6 +3,7 @@
 @section('styles')
 <style>
     body {
+        font-family: var(--font-sans);
         overflow: hidden !important;
     }
 
@@ -14,7 +15,7 @@
     }
 
     .game-container {
-        background: white;
+        background: var(--color-surface);
         border-radius: 0;
         overflow: hidden;
         box-shadow: none;
@@ -28,8 +29,9 @@
     }
 
     .game-header {
-        background: linear-gradient(135deg, {{ $theme->color_primary }}, {{ $theme->color_secondary }});
-        color: white;
+        background: var(--color-surface);
+        border-bottom: 1px solid var(--color-border-light);
+        color: var(--color-text);
         padding: 20px;
         display: flex;
         justify-content: space-between;
@@ -54,13 +56,23 @@
 
     .hud-label {
         font-size: 0.8em;
-        opacity: 0.9;
+        color: var(--color-text-muted);
     }
 
     .hud-value {
         font-size: 1.5em;
         font-weight: bold;
+        color: var(--color-text);
     }
+
+    .exit-chip {
+        display: flex; align-items: center; gap: 6px; padding: 8px 14px;
+        background: var(--color-secondary-50); border: 1px solid rgba(232,145,143,0.3);
+        border-radius: 999px; color: var(--color-secondary); font-weight: 600;
+        font-size: 0.82rem; cursor: pointer; transition: all 0.25s;
+        text-decoration: none; white-space: nowrap;
+    }
+    .exit-chip:hover { background: rgba(232,145,143,0.15); border-color: rgba(232,145,143,0.5); }
 
     .game-board {
         flex: 1;
@@ -71,12 +83,13 @@
 
     .character-card {
         position: absolute;
-        background: white;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border-light);
         border-radius: 10px;
         padding: 15px;
         text-align: center;
         cursor: pointer;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        box-shadow: var(--shadow-md);
         transition: all 0.1s ease;
         user-select: none;
         min-width: 80px;
@@ -84,7 +97,7 @@
 
     .character-card:hover {
         transform: scale(1.05);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        box-shadow: var(--shadow-lg);
     }
 
     .character-card.correct {
@@ -109,38 +122,38 @@
     }
 
     .feedback-particle.correct {
-        background: var(--color-success);
-        box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+        background: var(--color-accent);
+        box-shadow: 0 0 8px rgba(107,197,160,0.5);
     }
 
     .feedback-particle.incorrect {
-        background: var(--color-error);
-        box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+        background: var(--color-secondary);
+        box-shadow: 0 0 8px rgba(232,145,143,0.5);
     }
 
     .hanzi {
         font-size: 2.5em;
         font-weight: bold;
-        color: #333;
+        color: var(--color-text);
         margin-bottom: 5px;
     }
 
     .pinyin {
         font-size: 0.9em;
-        color: #666;
+        color: var(--color-text-muted);
     }
 
     .game-footer {
-        background: #f8fafc;
+        background: var(--color-surface);
         padding: 15px 20px;
         text-align: center;
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid var(--color-border-light);
     }
 
     .progress-bar {
         width: 100%;
         height: 6px;
-        background: #e2e8f0;
+        background: var(--color-border);
         border-radius: 3px;
         overflow: hidden;
         margin-bottom: 10px;
@@ -148,7 +161,7 @@
 
     .progress-fill {
         height: 100%;
-        background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+        background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
         transition: width 0.1s linear;
     }
 
@@ -159,7 +172,8 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.7);
+        background: rgba(45, 42, 74, 0.4);
+        backdrop-filter: blur(8px);
         z-index: 1000;
         align-items: center;
         justify-content: center;
@@ -171,16 +185,17 @@
     }
 
     .modal-content {
-        background: white;
-        border-radius: 15px;
+        background: var(--color-surface);
+        border-radius: var(--radius-lg);
         padding: 40px;
         text-align: center;
         max-width: 500px;
+        box-shadow: var(--shadow-lg);
         animation: slideUp 0.3s ease;
     }
 
     .modal-content h2 {
-        color: var(--color-primary);
+        color: var(--color-text);
         margin-bottom: 20px;
         font-size: 2em;
     }
@@ -193,14 +208,15 @@
     }
 
     .stat-item {
-        background: #f8fafc;
+        background: var(--color-bg);
+        border: 1px solid var(--color-border-light);
+        border-radius: var(--radius-md);
         padding: 15px;
-        border-radius: 8px;
     }
 
     .stat-label {
         font-size: 0.9em;
-        color: #666;
+        color: var(--color-text-muted);
         margin-bottom: 5px;
     }
 
@@ -257,10 +273,7 @@
 @endsection
 
 @section('content')
-<div class="header" style="margin-bottom: 20px;">
-    <h1>🎯 {{ $theme->name }}</h1>
-    <p>Identifica correctamente los caracteres</p>
-</div>
+<h1><i data-lucide="crosshair" style="color:var(--color-primary);vertical-align:-3px;"></i> {{ $theme->name }}</h1>
 
 <div class="game-container">
     <!-- HUD (Heads Up Display) -->
@@ -297,6 +310,12 @@
                 <div class="hud-label">Nivel</div>
                 <div class="hud-value" id="level">{{ $gameData['level'] }}</div>
             </div>
+
+            <a href="{{ route('games.selectTheme', ['gameSlug' => 'catch-the-character']) }}"
+               onclick="return confirm('¿Seguro que quieres salir? Perderás el progreso actual.')"
+               class="exit-chip">
+                <i data-lucide="log-out" style="width:14px;height:14px;"></i> Salir
+            </a>
         </div>
     </div>
 
@@ -340,18 +359,18 @@
 
         <div style="display: flex; gap: 10px; flex-direction: column;">
             <button class="btn btn-primary" onclick="location.href='{{ route('games.selectTheme', 'catch-the-character') }}'">
-                Volver a Seleccionar Tema
+                <i data-lucide="palette" style="width:16px;height:16px;"></i> Volver a Seleccionar Tema
             </button>
             <button class="btn btn-secondary" onclick="location.href='{{ route('games.index') }}'">
-                Menú Principal
+                <i data-lucide="home" style="width:16px;height:16px;"></i> Menu Principal
             </button>
         </div>
     </div>
 </div>
 
 <div style="text-align: center; margin-top: 20px;">
-    <button class="btn btn-secondary" onclick="location.href='{{ route('games.selectTheme', 'catch-the-character') }}'">
-        ← Seleccionar Otro Tema
+    <button class="btn btn-ghost" onclick="location.href='{{ route('games.selectTheme', 'catch-the-character') }}'">
+        <i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Seleccionar Otro Tema
     </button>
 </div>
 @endsection
